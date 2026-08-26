@@ -130,7 +130,7 @@
             <!-- One-click: installs C++ build tools, the Xbox platform, and the CLI-managed
                  components (Zig/tools/SDK/docs), skipping whatever is already present. The
                  individual installers remain available via the RXDK command menu. -->
-            <Button Style="{StaticResource Act}" Content="Install Prerequisites"       Click="OnCompleteSetup" />
+            <Button x:Name="InstallPrereqsButton" Style="{StaticResource Act}" Content="Install Prerequisites"       Click="OnCompleteSetup" />
             <Button Style="{StaticResource Act}" Content="Settings"                Click="OnSettings" />
             <Button Style="{StaticResource Act}" Content="Refresh"                 Click="OnRefresh" />
 

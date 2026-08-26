@@ -201,6 +201,19 @@ namespace RxdkVs.Package.ToolWindow
                     ? Visibility.Collapsed : Visibility.Visible;
             }
 
+            // Hide "Install Prerequisites" once everything the installer (or a prior setup run) would
+            // do is already present: the VS-side prerequisites (.NET 8, MSVC v143, the Xbox platform)
+            // plus the core CLI components (SDK + host tools). Marketplace-installed users, who have
+            // none of this yet, still see the button. Left visible if state is unknown (no rows).
+            if (InstallPrereqsButton != null)
+            {
+                var sdk = rows.FirstOrDefault(r => r.Name == "SDK");
+                var tools = rows.FirstOrDefault(r => r.Name == "Tools");
+                var coreComponents = sdk != null && sdk.Installed && tools != null && tools.Installed;
+                var allReady = coreComponents && RxdkCommands.VsSidePrerequisitesInstalled();
+                InstallPrereqsButton.Visibility = allReady ? Visibility.Collapsed : Visibility.Visible;
+            }
+
             if (rows.Count == 0)
             {
                 ComponentsPanel.Children.Add(new TextBlock

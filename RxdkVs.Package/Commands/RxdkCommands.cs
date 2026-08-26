@@ -1046,6 +1046,14 @@ namespace RxdkVs.Package.Commands
             catch { return false; }
         }
 
+        // True when the VS-side prerequisites are all present: the .NET 8 runtime, the MSVC v143
+        // C++ tools, and a current 'Xbox' MSBuild platform. The tool window uses this (together with
+        // the CLI component versions) to hide the "Install Prerequisites" button once setup is
+        // complete — e.g. after the standalone installer has run. Marketplace-installed users, who
+        // have none of this yet, still see the button.
+        public static bool VsSidePrerequisitesInstalled()
+            => HasDotNet8() && HasVc143() && IsXboxPlatformCurrent();
+
         // Version this extension ships (from its manifest). Shared with the components gate.
         private static string GetExtensionVersion() => Services.ExtensionInfo.GetVersion();
 

@@ -107,6 +107,32 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
+      # Build the standalone installer (RXDK-VS-Setup.exe): reuses the VSIX just built, stages the
+      # engine extracted from it + the Xbox MSBuild platform, and runs Inno Setup 6 (installed on
+      # demand via winget/choco by the script). The installer does the full first-run setup
+      # (.NET 8, VSIX, Zig/tools/SDK/docs, Xbox platform, MSVC v143), so store-vs-installer users
+      # both land ready to build.
+      - name: Build installer (Inno Setup)
+        run: ./installer/build-installer.ps1 -SkipBuild
+
+      - name: Locate installer
+        id: setup
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Get-ChildItem -Path installer/out -Filter 'RXDK-VS-Setup.exe' -Recurse |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $exe) { throw 'RXDK-VS-Setup.exe not found after build' }
+          "path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+          "name=$($exe.Name)"     >> $env:GITHUB_OUTPUT
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: rxdk-vs20xx-setup
+          path: ${{ steps.setup.outputs.path }}
+          if-no-files-found: error
+          compression-level: 0
+
   release:
     name: Publish GitHub Release
     needs: build
@@ -129,6 +155,12 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: rxdk-vs20xx-vsix
+          path: dist
+
+      - name: Download installer artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: rxdk-vs20xx-setup
           path: dist
 
       - name: Resolve release tag
@@ -164,9 +196,11 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          files=(dist/*.vsix)
+          # Publish both the .vsix (Marketplace-style install) and the .exe installer
+          # (one-stop first-run setup).
+          files=(dist/*.vsix dist/*.exe)
           if [[ ${#files[@]} -eq 0 ]]; then
-            echo "No VSIX in dist/" >&2
+            echo "No release assets in dist/" >&2
             exit 1
           fi
           gh release create "${{ steps.meta.outputs.tag }}" \
@@ -185,5 +219,6 @@ jobs:
             echo ""
             echo "- Tag: \`${{ steps.meta.outputs.tag }}\`"
             echo "- Moving latest: \`${{ steps.meta.outputs.moving }}\`"
-            echo "- Asset: \`*.vsix\` (double-click to install in VS 2022/2026)"
+            echo "- Assets: \`*.vsix\` (double-click to install in VS 2022/2026) and"
+            echo "  \`RXDK-VS-Setup.exe\` (one-stop installer: extension + all prerequisites)"
           } >> "$GITHUB_STEP_SUMMARY"

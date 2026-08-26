@@ -107,11 +107,12 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
-      # Build the standalone installer (RXDK-VS-Setup.exe): reuses the VSIX just built, stages the
-      # engine extracted from it + the Xbox MSBuild platform, and runs Inno Setup 6 (installed on
-      # demand via winget/choco by the script). The installer does the full first-run setup
-      # (.NET 8, VSIX, Zig/tools/SDK/docs, Xbox platform, MSVC v143), so store-vs-installer users
-      # both land ready to build.
+      # Build the standalone installer (RXDK-VS-Setup.exe, then zipped to RXDK-VS-Setup.zip):
+      # reuses the VSIX just built, stages the engine extracted from it + the Xbox MSBuild platform,
+      # and runs Inno Setup 6 (installed on demand via winget/choco by the script). The installer
+      # does the full first-run setup (.NET 8, VSIX, Zig/tools/SDK/docs, Xbox platform, MSVC v143),
+      # so store-vs-installer users both land ready to build. The zip is the published asset --
+      # a bare unsigned .exe trips the browser's "not commonly downloaded" warning.
       - name: Build installer (Inno Setup)
         run: ./installer/build-installer.ps1 -SkipBuild
 
@@ -119,11 +120,13 @@ jobs:
         id: setup
         run: |
           $ErrorActionPreference = 'Stop'
-          $exe = Get-ChildItem -Path installer/out -Filter 'RXDK-VS-Setup.exe' -Recurse |
+          # Ship the installer zipped -- a bare unsigned .exe trips the browser's
+          # "this file isn't commonly downloaded" warning; a .zip does not.
+          $zip = Get-ChildItem -Path installer/out -Filter 'RXDK-VS-Setup.zip' -Recurse |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          if (-not $exe) { throw 'RXDK-VS-Setup.exe not found after build' }
-          "path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
-          "name=$($exe.Name)"     >> $env:GITHUB_OUTPUT
+          if (-not $zip) { throw 'RXDK-VS-Setup.zip not found after build' }
+          "path=$($zip.FullName)" >> $env:GITHUB_OUTPUT
+          "name=$($zip.Name)"     >> $env:GITHUB_OUTPUT
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v5
@@ -196,9 +199,9 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          # Publish both the .vsix (Marketplace-style install) and the .exe installer
-          # (one-stop first-run setup).
-          files=(dist/*.vsix dist/*.exe)
+          # Publish both the .vsix (Marketplace-style install) and the zipped .exe
+          # installer (one-stop first-run setup; zipped to avoid browser download warnings).
+          files=(dist/*.vsix dist/*.zip)
           if [[ ${#files[@]} -eq 0 ]]; then
             echo "No release assets in dist/" >&2
             exit 1
@@ -220,5 +223,5 @@ jobs:
             echo "- Tag: \`${{ steps.meta.outputs.tag }}\`"
             echo "- Moving latest: \`${{ steps.meta.outputs.moving }}\`"
             echo "- Assets: \`*.vsix\` (double-click to install in VS 2022/2026) and"
-            echo "  \`RXDK-VS-Setup.exe\` (one-stop installer: extension + all prerequisites)"
+            echo "  \`RXDK-VS-Setup.zip\` (one-stop installer: extension + all prerequisites; unzip and run)"
           } >> "$GITHUB_STEP_SUMMARY"

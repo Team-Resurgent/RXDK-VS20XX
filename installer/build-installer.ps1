@@ -140,3 +140,12 @@ if ($LASTEXITCODE -ne 0) { throw "ISCC failed (exit $LASTEXITCODE)." }
 $out = Join-Path $OutputDir 'RXDK-VS-Setup.exe'
 if (-not (Test-Path -LiteralPath $out)) { throw "Installer not produced at $out." }
 Write-Host "Installer: $out" -ForegroundColor Green
+
+# --- zip the installer ---
+# Distribute the .exe inside a .zip so browsers don't flag a bare unsigned
+# executable at download time (the "this file isn't commonly downloaded" warning).
+$zip = Join-Path $OutputDir 'RXDK-VS-Setup.zip'
+if (Test-Path -LiteralPath $zip) { Remove-Item -LiteralPath $zip -Force }
+Compress-Archive -Path $out -DestinationPath $zip -CompressionLevel Optimal
+if (-not (Test-Path -LiteralPath $zip)) { throw "Installer zip not produced at $zip." }
+Write-Host "Installer zip: $zip" -ForegroundColor Green

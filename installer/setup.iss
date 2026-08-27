@@ -4,7 +4,8 @@
 ;   1. Ensures the .NET 8 Desktop Runtime (the RXDK engine is framework-dependent net8).
 ;   2. Stages the RXDK engine to C:\ProgramData\RXDK\engine.
 ;   3. Runs the engine's install-zig / install-tools / install-sdk / install-docs verbs so
-;      Zig, the host tools, the SDK and the docs are all present before VS opens.
+;      Zig, the host tools, the SDK and the docs are all present before VS opens. The XDK
+;      sample suite (install-samples) is optional -- an opt-out task checkbox, checked by default.
 ;   4. Installs the RXDK "Xbox" MSBuild platform into every VS 2022+ install (with the
 ;      RxdkPlatform.version stamp the extension checks) so Xbox projects load and build.
 ;   5. Adds the MSVC v143 C++ build tools if they're missing (via the VS Installer).
@@ -69,6 +70,11 @@ MinVersion=10.0
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+; The XDK sample suite is the one large, optional component -- offer it as an
+; opt-out checkbox (checked by default) rather than always pulling the full repo.
+Name: "samples"; Description: "Install the RXDK sample suite (large download)"; GroupDescription: "Optional components:"
 
 [Files]
 ; The RXDK engine (Rxdk.Cli/Rxdk.Dap + net8 closure) -> the location the extension resolves.
@@ -383,6 +389,8 @@ begin
       RunEngineVerb('install-tools');
       RunEngineVerb('install-sdk');
       RunEngineVerb('install-docs');
+      if WizardIsTaskSelected('samples') then
+        RunEngineVerb('install-samples');
       InstallVc143IfMissing;
     finally
       ProgressPage.Hide;

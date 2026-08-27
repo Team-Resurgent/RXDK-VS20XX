@@ -3,7 +3,7 @@
   <Metadata>
     <!-- Id is stable across versions; the trailing GUID keeps it globally unique. -->
     <Identity Id="RxdkVs.Package.a069146d-e49e-4913-92cc-339495d0cd21"
-              Version="1.1.3"
+              Version="1.1.4"
               Language="en-US"
               Publisher="Team Resurgent" />
     <DisplayName>RXDK for Visual Studio</DisplayName>

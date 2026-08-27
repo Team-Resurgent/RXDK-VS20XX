@@ -19,6 +19,9 @@ namespace RxdkVs.Package
         /// <summary>The RXDK tool window's persistence GUID.</summary>
         public const string ToolWindowGuidString = "9afdd434-9369-4407-965a-03b931e7b46b";
 
+        /// <summary>The RXDK documentation tool window's persistence GUID (the internal doc viewer).</summary>
+        public const string DocsToolWindowGuidString = "b2e9c1a4-7d3f-4e28-9a51-6c0f2d4b8e77";
+
         /// <summary>
         /// UI-context GUID activated when the opened folder contains rxdk.project.json.
         /// [ProvideAutoLoad] on this context loads the package for RXDK folders only.

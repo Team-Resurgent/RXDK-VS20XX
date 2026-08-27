@@ -31,6 +31,8 @@ namespace RxdkVs.Package
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideOptionPage(typeof(Options.RxdkOptionsPage), "RXDK", "General", 0, 0, supportsAutomation: true)]
     [ProvideToolWindow(typeof(RxdkToolWindow), Style = VsDockStyle.Tabbed, Window = "DocumentWell", Orientation = ToolWindowOrientation.Left)]
+    // The internal documentation viewer (WebView2). Opens as a large tab in the document well.
+    [ProvideToolWindow(typeof(DocsToolWindow), Style = VsDockStyle.Tabbed, Window = "DocumentWell")]
     [ProvideAutoLoad(RxdkPackageGuids.RxdkProjectContextString, PackageAutoLoadFlags.BackgroundLoad)]
     // Also load for any open solution, so the F5 interceptor is registered when a .sln (with
     // native Xbox .vcxproj projects) is open — Open Folder is not the only project model.

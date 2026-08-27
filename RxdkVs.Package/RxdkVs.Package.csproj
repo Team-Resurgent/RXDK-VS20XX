@@ -74,6 +74,8 @@
     <Reference Include="System.Xml.Linq" />
     <!-- FolderBrowserDialog for the Import Project wizard. -->
     <Reference Include="System.Windows.Forms" />
+    <!-- System.Drawing.Color, used by the docs viewer to map VS theme colors to CSS. -->
+    <Reference Include="System.Drawing" />
     <!-- WPF, used by the tool window control. -->
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -104,11 +106,20 @@
     <Compile Include="ToolWindow\RxdkToolWindowControl.xaml.cs">
       <DependentUpon>RxdkToolWindowControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ToolWindow\DocsToolWindow.cs" />
+    <Compile Include="ToolWindow\DocsToolWindowControl.xaml.cs">
+      <DependentUpon>DocsToolWindowControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Services\DocsShell.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Page Include="ToolWindow\RxdkToolWindowControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ToolWindow\DocsToolWindowControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -178,6 +189,9 @@
          read rxdk.project.json and write tasks.vs.json/launch.vs.json/CppProperties.json.
          The assembly must ship in the VSIX (IncludeInVSIXContainer picks it up as a dependency). -->
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <!-- WebView2 SDK for the internal documentation viewer (DocsToolWindow). The Edge WebView2
+         runtime ships with VS 2022; this NuGet supplies the managed control + native loader. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

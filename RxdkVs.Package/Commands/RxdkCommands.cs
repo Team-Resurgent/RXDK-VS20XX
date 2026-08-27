@@ -389,7 +389,17 @@ namespace RxdkVs.Package.Commands
             }
             if (landing != null)
             {
-                Process.Start(new ProcessStartInfo(landing) { UseShellExecute = true });
+                // Render docs inside VS in the themed WebView2 viewer (not the system browser), so a
+                // doc set looks the same in VS as it does in the VS Code doc panel.
+                var pane = _package.FindToolWindow(typeof(DocsToolWindow), 0, create: true) as DocsToolWindow;
+                if (pane?.Frame is IVsWindowFrame frame)
+                {
+                    ErrorHandler.ThrowOnFailure(frame.Show());
+                }
+                if (pane?.View != null)
+                {
+                    await pane.View.ShowDocsAsync(Path.GetDirectoryName(landing), Path.GetFileName(landing));
+                }
             }
             else
             {

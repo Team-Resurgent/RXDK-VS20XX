@@ -40,6 +40,18 @@
   </EnumProperty>
 
   <!-- ===== Compiler ===== -->
+  <BoolProperty Name="RxdkExceptions" DisplayName="Enable C++ Exceptions"
+                Category="Compiler" Default="true"
+                Description="Compile C++ sources with exception support (-fexceptions). On by default -- RXDK's C++ runtime supports real DWARF exceptions on the console. Set to false (-fno-exceptions) to drop the EH tables when a title never throws." />
+
+  <EnumProperty Name="RxdkCppStandard" DisplayName="C++ Language Standard"
+                Category="Compiler" Default="c++23"
+                Description="The C++ language standard (-std) for this project's C++ sources. RXDK's libc++ gates C++20/23 features on the standard, so pick the one your code needs.">
+    <EnumValue Name="c++17" DisplayName="ISO C++17 (-std=c++17)" />
+    <EnumValue Name="c++20" DisplayName="ISO C++20 (-std=c++20)" />
+    <EnumValue Name="c++23" DisplayName="ISO C++23 (-std=c++23)" />
+  </EnumProperty>
+
   <StringListProperty Name="RxdkDefines" DisplayName="Preprocessor Definitions"
                       Category="Compiler" Separator=";"
                       Description="Extra preprocessor macros passed to the compiler (in addition to the built-in _XBOX;XBOX). One per entry, e.g. MY_FLAG or NAME=VALUE." />

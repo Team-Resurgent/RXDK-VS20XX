@@ -75,7 +75,10 @@
        Platform.targets writes into out\ before the build runs. -->
   <PropertyGroup>
     <NMakeBuildCommandLine>"$(RxdkCli)" build --project-root "$(MSBuildProjectDirectory)" --optimize $(RxdkOptimize) --manifest "$(RxdkManifestFile)"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>"$(RxdkCli)" build --project-root "$(MSBuildProjectDirectory)" --optimize $(RxdkOptimize) --manifest "$(RxdkManifestFile)"</NMakeReBuildCommandLine>
+    <!-- Rebuild = Clean + Build: wipe out\ (objects + depfiles) first so the engine's incremental
+         compile can't short-circuit, matching the from-scratch semantics users expect of Rebuild. -->
+    <NMakeReBuildCommandLine>if exist "$(MSBuildProjectDirectory)\out" rmdir /S /Q "$(MSBuildProjectDirectory)\out"
+"$(RxdkCli)" build --project-root "$(MSBuildProjectDirectory)" --optimize $(RxdkOptimize) --manifest "$(RxdkManifestFile)"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>if exist "$(MSBuildProjectDirectory)\out" rmdir /S /Q "$(MSBuildProjectDirectory)\out"</NMakeCleanCommandLine>
     <!-- IntelliSense parses with the MSVC front-end; give it the MSVC standard switch. The clang
          '-std=c++23' the real build uses is not understood here. -->
@@ -138,6 +141,7 @@
       <Defines ParameterType="System.String" />
       <CppStandard ParameterType="System.String" />
       <Exceptions ParameterType="System.String" />
+      <Incremental ParameterType="System.String" />
       <ProjectReferences ParameterType="System.String" />
       <DeployPaths ParameterType="System.String" />
       <Embed ParameterType="System.String" />
@@ -206,6 +210,8 @@
             sb.Append("  \"cppStandard\": \"" + esc(CppStandard.Trim()) + "\",\n");
         if (!string.IsNullOrWhiteSpace(Exceptions))
             sb.Append("  \"exceptions\": " + (Exceptions.Trim().ToLowerInvariant() == "true" ? "true" : "false") + ",\n");
+        if (!string.IsNullOrWhiteSpace(Incremental))
+            sb.Append("  \"incremental\": " + (Incremental.Trim().ToLowerInvariant() == "true" ? "true" : "false") + ",\n");
         var prefs = split(ProjectReferences);
         if (prefs.Length > 0) sb.Append("  \"projectReferences\": " + arr(prefs) + ",\n");
         var deploys = split(DeployPaths);
@@ -280,6 +286,7 @@
       Defines="$(RxdkDefines)"
       CppStandard="$(RxdkCppStandard)"
       Exceptions="$(RxdkExceptions)"
+      Incremental="$(RxdkIncrementalBuild)"
       ProjectReferences="$(RxdkProjectReferences);@(ProjectReference->'%(RelativeDir)')"
       DeployPaths="$(RxdkDeployPaths)"
       Embed="$(RxdkEmbed)"

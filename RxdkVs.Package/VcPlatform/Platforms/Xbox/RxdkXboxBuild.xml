@@ -39,6 +39,10 @@
     <EnumValue Name="ReleaseSmall" DisplayName="ReleaseSmall (smallest size)" />
   </EnumProperty>
 
+  <BoolProperty Name="RxdkIncrementalBuild" DisplayName="Enable Incremental Build"
+                Category="General" Default="true"
+                Description="Recompile only the sources whose object is out of date (older than the source or a header it includes, tracked via depfiles), and skip the link/image/ISO steps when nothing changed. On by default. Rebuild and Clean still force a full from-scratch build. Set to false to always recompile every source." />
+
   <!-- ===== Compiler ===== -->
   <BoolProperty Name="RxdkExceptions" DisplayName="Enable C++ Exceptions"
                 Category="Compiler" Default="true"

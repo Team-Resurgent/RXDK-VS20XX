@@ -6,8 +6,8 @@
       "type": "library",
       "configuration": "debug",
       "sources": [
-        "src\\stb_vorbis_impl.c",
-        "src\\vorbis_stream.c"
+        "src/stb_vorbis_impl.c",
+        "src/vorbis_stream.c"
       ],
       "publicIncludePaths": [
         "include"
@@ -26,14 +26,14 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Debug"
+      "outputDir": "out/Debug"
     },
     "Release": {
       "type": "library",
       "configuration": "release",
       "sources": [
-        "src\\stb_vorbis_impl.c",
-        "src\\vorbis_stream.c"
+        "src/stb_vorbis_impl.c",
+        "src/vorbis_stream.c"
       ],
       "publicIncludePaths": [
         "include"
@@ -52,7 +52,7 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Release"
+      "outputDir": "out/Release"
     }
   }
 }

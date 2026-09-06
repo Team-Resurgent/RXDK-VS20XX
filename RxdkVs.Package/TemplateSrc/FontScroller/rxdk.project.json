@@ -5,7 +5,7 @@
     "Debug": {
       "configuration": "debug",
       "sources": [
-        "src\\main.cpp"
+        "src/main.cpp"
       ],
       "libraries": [
         "libxgraphics",
@@ -26,12 +26,12 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Debug"
+      "outputDir": "out/Debug"
     },
     "Release": {
       "configuration": "release",
       "sources": [
-        "src\\main.cpp"
+        "src/main.cpp"
       ],
       "libraries": [
         "libxgraphics",
@@ -52,7 +52,7 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Release"
+      "outputDir": "out/Release"
     }
   }
 }

@@ -6,7 +6,7 @@
       "type": "library",
       "configuration": "debug",
       "sources": [
-        "src\\cubemesh.cpp"
+        "src/cubemesh.cpp"
       ],
       "publicIncludePaths": [
         "include"
@@ -22,13 +22,13 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Debug"
+      "outputDir": "out/Debug"
     },
     "Release": {
       "type": "library",
       "configuration": "release",
       "sources": [
-        "src\\cubemesh.cpp"
+        "src/cubemesh.cpp"
       ],
       "publicIncludePaths": [
         "include"
@@ -44,7 +44,7 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Release"
+      "outputDir": "out/Release"
     }
   }
 }

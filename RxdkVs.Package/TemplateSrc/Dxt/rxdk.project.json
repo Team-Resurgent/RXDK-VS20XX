@@ -6,7 +6,7 @@
       "type": "dxt",
       "configuration": "release",
       "sources": [
-        "src\\main.c"
+        "src/main.c"
       ],
       "libraries": [
         "libxbdm",
@@ -24,13 +24,13 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Debug"
+      "outputDir": "out/Debug"
     },
     "Release": {
       "type": "dxt",
       "configuration": "release",
       "sources": [
-        "src\\main.c"
+        "src/main.c"
       ],
       "libraries": [
         "libxbdm",
@@ -48,7 +48,7 @@
         "dontMountUtilityDrive": false,
         "formatUtilityDrive": false
       },
-      "outputDir": "out\\Release"
+      "outputDir": "out/Release"
     }
   }
 }

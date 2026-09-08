@@ -27,13 +27,13 @@ if (-not $Root) { $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.M
 $Root = (Resolve-Path -LiteralPath $Root).Path
 $samplesRoot = Join-Path $Root 'XDKSamples'
 
-$manifests = Get-ChildItem $samplesRoot -Recurse -Filter rxdk.manifest.json |
-    Where-Object { $_.FullName -notmatch '\\bin\\|\\obj\\' }
+$manifests = Get-ChildItem $samplesRoot -Recurse -Filter rxdk.project.json |
+    Where-Object { $_.FullName -notmatch '\\bin\\|\\obj\\|\\out\\' }
 
 $rows = @()
 
 foreach ($m in $manifests) {
-    $projectRoot = Split-Path (Split-Path $m.FullName -Parent) -Parent
+    $projectRoot = Split-Path $m.FullName -Parent
     $name = (Get-Content $m.FullName -Raw | ConvertFrom-Json).name
     $packed = Join-Path $projectRoot "out\$Configuration\Build\$name\media"
     if (-not (Test-Path $packed)) { continue }

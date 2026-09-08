@@ -145,9 +145,9 @@ namespace RxdkVs.Package.Services
                 await ShowAsync(package, "Build failed — see the Output / Error List.");
                 return;
             }
-            // The manifest lives at the stable out\ path (not the per-config out\<cfg>\ output dir).
-            var manifest = Path.Combine(info.ProjectDir, "out", "rxdk.manifest.json");
-            if (await cli.RunAsync(new[] { "deploy", "--project-root", info.ProjectDir, "--manifest", manifest }, info.ProjectDir) != 0)
+            // Deploy reads the committed rxdk.project.json (generated from the .vcxproj by the build)
+            // and selects the built configuration's per-config outputDir.
+            if (await cli.RunAsync(new[] { "deploy", "--project-root", info.ProjectDir, "--configuration", info.SolutionConfig }, info.ProjectDir) != 0)
             {
                 await ShowAsync(package, "Deploy failed — is the devkit on and reachable? Fix it and run Deploy to Xbox again.");
                 return;
@@ -188,16 +188,15 @@ namespace RxdkVs.Package.Services
                 return;
             }
 
-            // Build through VS/MSBuild (not Rxdk.Cli directly): that runs Rxdk.Xbox.targets, which
-            // generates the manifest into out\ from the .vcxproj. Then deploy reads it via --manifest.
+            // Build through VS/MSBuild (not Rxdk.Cli directly): that runs the platform's
+            // RxdkGenerateProjectJson target, which writes the committed rxdk.project.json from the
+            // .vcxproj. Then deploy reads that and selects the built configuration.
             if (!await BuildViaVsAsync(package, info))
             {
                 await ShowAsync(package, "Build failed — see the Output / Error List.");
                 return;
             }
-            // The manifest lives at the stable out\ path (not the per-config out\<cfg>\ output dir).
-            var manifest = Path.Combine(info.ProjectDir, "out", "rxdk.manifest.json");
-            if (await cli.RunAsync(new[] { "deploy", "--project-root", info.ProjectDir, "--manifest", manifest }, info.ProjectDir) != 0)
+            if (await cli.RunAsync(new[] { "deploy", "--project-root", info.ProjectDir, "--configuration", info.SolutionConfig }, info.ProjectDir) != 0)
             {
                 await ShowAsync(package, "Deploy failed — is the devkit on and reachable?");
                 return;

@@ -68,11 +68,11 @@ function Get-Affinity([string] $a, [string] $b) {
 
 $plan = @()
 
-$manifests = Get-ChildItem $samplesRoot -Recurse -Filter rxdk.manifest.json |
-    Where-Object { $_.FullName -notmatch '\\bin\\|\\obj\\' }
+$manifests = Get-ChildItem $samplesRoot -Recurse -Filter rxdk.project.json |
+    Where-Object { $_.FullName -notmatch '\\bin\\|\\obj\\|\\out\\' }
 
 foreach ($m in $manifests) {
-    $projectRoot = Split-Path (Split-Path $m.FullName -Parent) -Parent
+    $projectRoot = Split-Path $m.FullName -Parent
     $sampleDir = Split-Path $projectRoot -Parent
     $name = (Get-Content $m.FullName -Raw | ConvertFrom-Json).name
 

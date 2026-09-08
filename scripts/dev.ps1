@@ -99,20 +99,19 @@ function Invoke-Samples {
     Ok "Samples built."
 }
 
-function Get-SampleManifest { Join-Path (Get-SampleDir) 'out\rxdk.manifest.json' }
-
 function Invoke-Deploy {
     Info "Building+deploying '$Sample' to the kit"
-    # Build via MSBuild so Rxdk.Xbox.targets generates the manifest from the .vcxproj.
+    # Build via MSBuild so the platform's RxdkGenerateProjectJson target writes rxdk.project.json
+    # from the .vcxproj; deploy then reads it and selects this configuration's per-config output.
     $msb = Get-MSBuild
     & $msb -nologo -v:m "-p:Configuration=$Config;Platform=Xbox" (Join-Path (Get-SampleDir) "$Sample.vcxproj")
     if ($LASTEXITCODE -ne 0) { throw "build failed" }
-    & $Cli deploy --project-root (Get-SampleDir) --manifest (Get-SampleManifest)
+    & $Cli deploy --project-root (Get-SampleDir) --configuration $Config
     if ($LASTEXITCODE -ne 0) { throw "deploy failed" }
     Ok "Deployed '$Sample'."
 }
 
-function Invoke-Run    { Info "Launching '$Sample' on the kit"; & $Cli run --project-root (Get-SampleDir) --manifest (Get-SampleManifest) }
+function Invoke-Run    { Info "Launching '$Sample' on the kit"; & $Cli run --project-root (Get-SampleDir) }
 function Invoke-Reboot { Info "Warm-rebooting the kit"; & $Cli reboot }
 
 function Invoke-Smoke {

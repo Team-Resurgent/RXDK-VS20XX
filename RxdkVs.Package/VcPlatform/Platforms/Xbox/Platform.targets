@@ -3,13 +3,14 @@
   RXDK "Xbox" platform targets — a thin alias to the x64 platform targets (toolset/IntelliSense
   base).
 
-  NOTE: the RXDK build integration (the RxdkWriteManifest task, the RxdkGenerateManifest target,
-  and the pre/post-build-event targets) is intentionally defined in Platform.props, NOT here.
-  RXDK projects are ConfigurationType=Makefile, and Microsoft.Cpp.targets routes Makefile projects
-  through Microsoft.MakeFile.targets — it does NOT import the platform's Platform.targets for them.
-  Platform.props IS imported (via Microsoft.Cpp.props) for Makefile projects, so the manifest
-  generation lives there to actually run. The IntelliSense NMake* properties are applied even later,
-  via ForceImportAfterCppTargets (see Platform.props → Rxdk.Xbox.IntelliSense.props).
+  NOTE: the RXDK build integration (the RxdkWriteProjectJson task, the RxdkGenerateProjectJson /
+  _RxdkCollectConfig targets, and the pre/post-build-event targets) is intentionally defined in
+  Platform.props, NOT here. RXDK projects are ConfigurationType=Makefile, and Microsoft.Cpp.targets
+  routes Makefile projects through Microsoft.MakeFile.targets — it does NOT import the platform's
+  Platform.targets for them. Platform.props IS imported (via Microsoft.Cpp.props) for Makefile
+  projects, so the rxdk.project.json generation lives there to actually run. The IntelliSense NMake*
+  properties are applied even later, via ForceImportAfterCppTargets (see Platform.props →
+  Rxdk.Xbox.IntelliSense.props).
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(VCTargetsPath)\Platforms\x64\Platform.targets" />

@@ -1,4 +1,4 @@
-# Builds every project with an rxdk.manifest.json and reports the failures.
+# Builds every project with an rxdk.project.json and reports the failures.
 # A blunt regression check for changes that reach all titles (SDK libs, link recipe).
 # Windows PowerShell 5.1 compatible: throttles plain child processes rather than
 # using ForEach-Object -Parallel.
@@ -14,8 +14,8 @@ $cli = (Get-ChildItem (Join-Path $Root "Rxdk.Cli\bin") -Recurse -Filter Rxdk.Cli
         Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName
 if (-not $cli) { throw "Rxdk.Cli.exe not found; run 'dotnet build Rxdk.Cli' first." }
 
-$manifests = Get-ChildItem $Root -Recurse -Filter rxdk.manifest.json |
-    Where-Object { $_.FullName -notmatch '\\bin\\|\\obj\\' }
+$manifests = Get-ChildItem $Root -Recurse -Filter rxdk.project.json |
+    Where-Object { $_.FullName -notmatch '\\bin\\|\\obj\\|\\out\\' }
 
 "Building $($manifests.Count) projects with $cli"
 
@@ -43,11 +43,11 @@ foreach ($m in $manifests) {
         if ($running.Count -ge $Throttle) { Start-Sleep -Milliseconds 200 }
     }
 
-    $projectRoot = Split-Path (Split-Path $m.FullName -Parent) -Parent
+    $projectRoot = Split-Path $m.FullName -Parent
     $name = (Get-Content $m.FullName -Raw | ConvertFrom-Json).name
     $log = Join-Path $logDir ("{0}.log" -f ($m.FullName -replace '[\\:]', '_'))
     $p = Start-Process -FilePath $cli -NoNewWindow -PassThru `
-        -ArgumentList @("build", "--project-root", $projectRoot, "--manifest", $m.FullName) `
+        -ArgumentList @("build", "--project-root", $projectRoot, "--configuration", $Configuration) `
         -RedirectStandardOutput $log -RedirectStandardError "$log.err"
     # Touching Handle caches the process handle; without it Windows PowerShell
     # closes it on exit and ExitCode comes back empty for every child.

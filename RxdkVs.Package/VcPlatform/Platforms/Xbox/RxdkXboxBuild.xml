@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   "Xbox Build" project property page. Holds the compile-time build settings for RXDK Xbox
-  projects. Currently: which Zig optimize mode the Release configuration uses (Debug is always
-  -O0 -g). Rxdk.Xbox.props maps Configuration + this property to $(RxdkOptimize), which the
-  Makefile build passes to Rxdk.Cli (optimize switch). Per-configuration, before Xbox Image.
+  projects. The Build Flavor (Debug/Release) drives the SDK library variant; the engine derives
+  the compiler optimize level from that same flag, so there is no separate optimize control.
+  These properties are written into the committed rxdk.project.json the build generates from the
+  .vcxproj. Per-configuration, before Xbox Image.
 -->
 <Rule Name="RxdkXboxBuild"
       DisplayName="Xbox Build"
@@ -29,14 +30,6 @@
                 Description="Whether this configuration builds Debug (unoptimized -O0, debug info, debug SDK libs) or Release (optimized, release SDK libs). Defaults from the configuration name; set it explicitly for a custom configuration.">
     <EnumValue Name="Debug" DisplayName="Debug (unoptimized, debug libs)" />
     <EnumValue Name="Release" DisplayName="Release (optimized, release libs)" />
-  </EnumProperty>
-
-  <EnumProperty Name="RxdkReleaseOptimize" DisplayName="Release Optimization"
-                Category="General" Default="ReleaseFast"
-                Description="Zig optimize mode used when the Build Flavor is Release. Ignored for Debug (always -O0 with debug info).">
-    <EnumValue Name="ReleaseFast" DisplayName="ReleaseFast (fastest runtime)" />
-    <EnumValue Name="ReleaseSafe" DisplayName="ReleaseSafe (runtime safety checks)" />
-    <EnumValue Name="ReleaseSmall" DisplayName="ReleaseSmall (smallest size)" />
   </EnumProperty>
 
   <BoolProperty Name="RxdkIncrementalBuild" DisplayName="Enable Incremental Build"

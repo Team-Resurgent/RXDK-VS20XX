@@ -1079,10 +1079,11 @@ namespace RxdkVs.Package.Commands
 
         private async Task SetBuildTypeAsync()
         {
-            // Persisted in an Options page (Phase 3). For now surface the choices; the actual
-            // --optimize value is passed by the build task once wired to settings.
-            await ShowInfoAsync("Set Build Type: Debug / ReleaseSafe / ReleaseFast / ReleaseSmall. " +
-                "An Options page persists this in Phase 3; until then edit tasks.vs.json's --optimize.");
+            // Build flavor is the solution configuration (Debug/Release): the engine derives the
+            // compiler optimize level from it, so there's no separate optimize setting to persist.
+            await ShowInfoAsync("Build flavor follows the active solution configuration (Debug / Release) — " +
+                "pick it from the toolbar configuration selector. Per-project, set it via the project's " +
+                "Xbox Build property page (Build Flavor).");
         }
 
         private async Task CycleGlobalsScopeAsync()

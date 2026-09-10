@@ -710,51 +710,96 @@ namespace RxdkVs.Package.Commands
         // though the actual compile is delegated to Zig/clang.
         private const string Vc143Component = "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
 
-        // Install the custom 'Xbox' MSBuild platform into every VS install's VCTargetsPath so RXDK
-        // .vcxproj projects (Platform=Xbox) load and build. The platform is a thin alias to x64
-        // (RXDK titles are Makefile projects built by Rxdk.Cli; x64's toolset only drives
-        // IntelliSense). Writing under Program Files needs elevation, so the copy runs via a
-        // one-shot elevated PowerShell (UAC) — nothing is changed silently.
+        // Install the custom 'Xbox' MSBuild platform and the RXDK MSBuild Application Type into every
+        // VS install. The Xbox platform is a thin alias to x64, while the RXDK Application Type provides
+        // the MSBuild props/targets/tasks used by RXDK projects. Writing under Program Files needs
+        // elevation, so the copy runs via a one-shot elevated PowerShell (UAC) — nothing is changed silently.
         private async Task InstallXboxPlatformAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             try
             {
                 var vsixDir = Path.GetDirectoryName(typeof(RxdkCommands).Assembly.Location);
-                var src = Path.Combine(vsixDir ?? "", "VcPlatform", "Platforms", "Xbox");
-                if (!Directory.Exists(src))
+
+                var platformSrc = Path.Combine(vsixDir ?? "", "VcPlatform", "Platforms", "Xbox");
+                if (!Directory.Exists(platformSrc))
                 {
-                    await ShowErrorAsync($"Xbox platform files not found in the extension ({src}). Reinstall the RXDK extension.");
+                    await ShowErrorAsync(
+                        $"Xbox platform files not found in the extension ({platformSrc}). Reinstall the RXDK extension.");
+                    return;
+                }
+
+                var appTypeSrc = Path.Combine(vsixDir ?? "", "ApplicationType", "RXDK");
+                if (!Directory.Exists(appTypeSrc))
+                {
+                    await ShowErrorAsync(
+                        $"RXDK Application Type files not found in the extension ({appTypeSrc}). Reinstall the RXDK extension.");
                     return;
                 }
 
                 var dests = FindXboxPlatformDests();
                 if (dests.Count == 0)
                 {
-                    await ShowInfoAsync("No Visual Studio C++ targets were found. Install the \"Desktop development with C++\" workload (Install C++ Build Tools), then try again.");
+                    await ShowInfoAsync(
+                        "No Visual Studio C++ targets were found. Install the \"Desktop development with C++\" workload (Install C++ Build Tools), then try again.");
                     return;
                 }
 
-                var list = string.Join("\n", dests.Select(d => "  • " + d));
-                var go = VsShellUtilities.ShowMessageBox(_package,
-                    "This installs (or updates) the RXDK 'Xbox' build platform in Visual Studio so Xbox " +
-                    "projects load and build:\n\n" + list + "\n\nYou'll be asked to elevate (UAC). Continue?",
-                    "RXDK", OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                if (go != (int)VSConstants.MessageBoxResult.IDYES) return;
+                var list = string.Join("\n", dests.Select(d =>
+                    "  • " + d + Environment.NewLine +
+                    "    " + Path.Combine(
+                        Path.GetDirectoryName(d) ?? "",
+                        "Application Type",
+                        "RXDK")));
 
-                // Build a one-shot elevated script that robocopies the alias into each dest, then
-                // writes a version stamp so a later run can tell a current platform from a stale one.
+                var go = VsShellUtilities.ShowMessageBox(
+                    _package,
+                    "This installs (or updates) the RXDK Visual Studio build integration:\n\n" +
+                    "  • RXDK 'Xbox' build platform\n" +
+                    "  • RXDK MSBuild Application Type\n\n" +
+                    "Visual Studio installations:\n\n" +
+                    list +
+                    "\n\nYou'll be asked to elevate (UAC). Continue?",
+                    "RXDK",
+                    OLEMSGICON.OLEMSGICON_QUERY,
+                    OLEMSGBUTTON.OLEMSGBUTTON_YESNO,
+                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+                if (go != (int)VSConstants.MessageBoxResult.IDYES)
+                    return;
+
+                // Build a one-shot elevated script that copies both the Xbox platform and the RXDK
+                // Application Type into each Visual Studio installation, then writes version stamps
+                // so a later run can identify stale installations.
                 var version = GetExtensionVersion();
                 var sb = new System.Text.StringBuilder();
+
                 sb.AppendLine("$ErrorActionPreference='Continue'");
+
                 foreach (var d in dests)
                 {
+                    var vcRoot = Path.GetDirectoryName(Path.GetDirectoryName(d));
+                    var appTypeDest = Path.Combine(vcRoot ?? "", "Application Type", "RXDK");
+
+                    var platformVersion = Path.Combine(d, "RxdkPlatform.version");
+                    var appTypeVersion = Path.Combine(appTypeDest, "RxdkApplicationType.version");
+
                     sb.AppendLine($"New-Item -ItemType Directory -Force -Path \"{d}\" | Out-Null");
-                    sb.AppendLine($"robocopy \"{src}\" \"{d}\" /E /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null");
-                    sb.AppendLine($"Set-Content -Path \"{Path.Combine(d, "RxdkPlatform.version")}\" -Value \"{version}\" -NoNewline -Encoding ascii");
+                    sb.AppendLine($"robocopy \"{platformSrc}\" \"{d}\" /E /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null");
+                    sb.AppendLine(
+                        $"Set-Content -Path \"{platformVersion}\" -Value \"{version}\" -NoNewline -Encoding ascii");
+
+                    sb.AppendLine($"New-Item -ItemType Directory -Force -Path \"{appTypeDest}\" | Out-Null");
+                    sb.AppendLine(
+                        $"robocopy \"{appTypeSrc}\" \"{appTypeDest}\" /E /NFL /NDL /NJH /NJS /R:1 /W:1 | Out-Null");
+                    sb.AppendLine(
+                        $"Set-Content -Path \"{appTypeVersion}\" -Value \"{version}\" -NoNewline -Encoding ascii");
                 }
-                var script = Path.Combine(Path.GetTempPath(), "rxdk-install-xbox-platform.ps1");
+
+                var script = Path.Combine(
+                    Path.GetTempPath(),
+                    "rxdk-install-xbox-platform.ps1");
+
                 File.WriteAllText(script, sb.ToString());
 
                 try
@@ -764,28 +809,77 @@ namespace RxdkVs.Package.Commands
                         FileName = "powershell.exe",
                         Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{script}\"",
                         UseShellExecute = true,
-                        Verb = "runas", // triggers the UAC elevation prompt
+                        Verb = "runas",
                     };
+
                     using (var p = Process.Start(psi))
                     {
                         await System.Threading.Tasks.Task.Run(() => p.WaitForExit());
                     }
                 }
-                catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+                catch (System.ComponentModel.Win32Exception ex)
+                    when (ex.NativeErrorCode == 1223)
                 {
-                    await ShowInfoAsync("Elevation was cancelled — the Xbox platform was not installed.");
+                    await ShowInfoAsync(
+                        "Elevation was cancelled — the RXDK Visual Studio integration was not installed.");
                     return;
                 }
+                finally
+                {
+                    try
+                    {
+                        if (File.Exists(script))
+                            File.Delete(script);
+                    }
+                    catch
+                    {
+                        // Best effort; the temporary script is harmless and will be cleaned up by Windows.
+                    }
+                }
 
-                var ok = dests.Any(d => File.Exists(Path.Combine(d, "Platform.props")));
-                if (ok)
-                    await ShowInfoAsync("The RXDK 'Xbox' platform is installed. Reload your solution (or restart Visual Studio) and Xbox projects will build.");
+                var installed = dests.Any(d =>
+                    File.Exists(Path.Combine(d, "Platform.props")));
+
+                var appTypeInstalled = dests.Any(d =>
+                {
+                    var vcRoot = Path.GetDirectoryName(Path.GetDirectoryName(d));
+                    var appTypeDest = Path.Combine(
+                        vcRoot ?? "",
+                        "Application Type",
+                        "RXDK");
+
+                    return Directory.Exists(appTypeDest);
+                });
+
+                if (installed && appTypeInstalled)
+                {
+                    await ShowInfoAsync(
+                        "The RXDK 'Xbox' platform and Application Type are installed. " +
+                        "Reload your solution (or restart Visual Studio) and Xbox projects will build.");
+                }
+                else if (installed)
+                {
+                    await ShowErrorAsync(
+                        "The Xbox platform was installed, but the RXDK Application Type copy did not complete. " +
+                        "Try the installation again.");
+                }
+                else if (appTypeInstalled)
+                {
+                    await ShowErrorAsync(
+                        "The RXDK Application Type was installed, but the Xbox platform copy did not complete. " +
+                        "Try the installation again.");
+                }
                 else
-                    await ShowErrorAsync("The Xbox platform copy did not complete. See if elevation was declined, then try again.");
+                {
+                    await ShowErrorAsync(
+                        "The RXDK Visual Studio integration copy did not complete. " +
+                        "See if elevation was declined, then try again.");
+                }
             }
             catch (Exception ex)
             {
-                await ShowErrorAsync($"Could not install the Xbox platform: {ex.Message}");
+                await ShowErrorAsync(
+                    $"Could not install the RXDK Visual Studio integration: {ex.Message}");
             }
         }
 
@@ -795,8 +889,15 @@ namespace RxdkVs.Package.Commands
         {
             var dests = new List<string>();
             var pf86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-            var vswhere = Path.Combine(pf86, "Microsoft Visual Studio", "Installer", "vswhere.exe");
-            if (!File.Exists(vswhere)) return dests;
+            var vswhere = Path.Combine(
+                pf86,
+                "Microsoft Visual Studio",
+                "Installer",
+                "vswhere.exe");
+
+            if (!File.Exists(vswhere))
+                return dests;
+
             try
             {
                 var psi = new ProcessStartInfo
@@ -807,14 +908,29 @@ namespace RxdkVs.Package.Commands
                     RedirectStandardOutput = true,
                     CreateNoWindow = true,
                 };
+
                 string outp;
-                using (var p = Process.Start(psi)) { outp = p.StandardOutput.ReadToEnd(); p.WaitForExit(10000); }
+                using (var p = Process.Start(psi))
+                {
+                    outp = p.StandardOutput.ReadToEnd();
+                    p.WaitForExit(10000);
+                }
+
                 foreach (var line in outp.Split('\n'))
                 {
                     var install = line.Trim();
-                    if (install.Length == 0) continue;
-                    var vcRoot = Path.Combine(install, "MSBuild", "Microsoft", "VC");
-                    if (!Directory.Exists(vcRoot)) continue;
+                    if (install.Length == 0)
+                        continue;
+
+                    var vcRoot = Path.Combine(
+                        install,
+                        "MSBuild",
+                        "Microsoft",
+                        "VC");
+
+                    if (!Directory.Exists(vcRoot))
+                        continue;
+
                     foreach (var vc in Directory.GetDirectories(vcRoot, "v1*"))
                     {
                         if (Directory.Exists(Path.Combine(vc, "Platforms", "x64")))
@@ -822,7 +938,11 @@ namespace RxdkVs.Package.Commands
                     }
                 }
             }
-            catch { /* return whatever we found */ }
+            catch
+            {
+                /* return whatever we found */
+            }
+
             return dests;
         }
 

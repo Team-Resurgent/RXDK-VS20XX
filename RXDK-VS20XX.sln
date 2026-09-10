@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rxdk.Dap", "external\RXDK-T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxdkVs.Package", "RxdkVs.Package\RxdkVs.Package.csproj", "{C5390B93-36FF-4DE6-9CA3-3776D9C709BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rxdk.MsBuild", "external\RXDK-Tools\src\Rxdk.MsBuild\Rxdk.MsBuild.csproj", "{72C2CD82-4280-44FE-B5C9-8362611DC6F9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,8 +71,23 @@ Global
 		{C5390B93-36FF-4DE6-9CA3-3776D9C709BB}.Release|x64.Build.0 = Release|Any CPU
 		{C5390B93-36FF-4DE6-9CA3-3776D9C709BB}.Release|x86.ActiveCfg = Release|Any CPU
 		{C5390B93-36FF-4DE6-9CA3-3776D9C709BB}.Release|x86.Build.0 = Release|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Release|x64.Build.0 = Release|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{72C2CD82-4280-44FE-B5C9-8362611DC6F9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1AD59CCD-0A7C-4F24-A1E0-9DB2841458E9}
 	EndGlobalSection
 EndGlobal

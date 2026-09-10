@@ -5,6 +5,8 @@ obj/
 [Rr]elease/
 *.user
 
+packages/
+
 # Scratch sweep/probe logs and screenshots written at the repo root
 /_*
 

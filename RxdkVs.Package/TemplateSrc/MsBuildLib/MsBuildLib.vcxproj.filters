@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{11111111-1111-4111-8111-111111111111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{22222222-2222-4222-8222-222222222222}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RXDK">
+      <UniqueIdentifier>{33333333-3333-4333-8333-333333333333}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\mylib.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="include\mylib.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <None Include="Rxdk.Xbox.props">
+      <Filter>RXDK</Filter>
+    </None>
+    <None Include="Rxdk.Xbox.targets">
+      <Filter>RXDK</Filter>
+    </None>
+    <None Include="RxdkDebugger.xml">
+      <Filter>RXDK</Filter>
+    </None>
+    <None Include="RxdkXboxImage.xml">
+      <Filter>RXDK</Filter>
+    </None>
+    <None Include="RxdkXboxDeployment.xml">
+      <Filter>RXDK</Filter>
+    </None>
+    <None Include="RxdkXboxCertificate.xml">
+      <Filter>RXDK</Filter>
+    </None>
+    <None Include="RxdkXboxTitleInfo.xml">
+      <Filter>RXDK</Filter>
+    </None>
+  </ItemGroup>
+</Project>

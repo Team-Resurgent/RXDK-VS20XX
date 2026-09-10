@@ -14,13 +14,12 @@
     is the intended build path; `dotnet build` on this project is NOT supported.
   -->
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{c5390b93-36ff-4de6-9ca3-3776d9c709bb}</ProjectGuid>
+    <ProjectGuid>{C5390B93-36FF-4DE6-9CA3-3776D9C709BB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RxdkVs.Package</RootNamespace>
@@ -29,7 +28,6 @@
     <FileAlignment>512</FileAlignment>
     <!-- First GUID = VSIX/VSPackage project type; second = C#. -->
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-
     <!-- Deploy into the experimental hive on F5 so debugging the VSIX doesn't disturb
          the real VS install. -->
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
@@ -39,13 +37,10 @@
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
     <UseCodebase>true</UseCodebase>
-
     <!-- Deploy VSIX on build so F5 into the experimental instance just works. -->
     <DeployExtension>true</DeployExtension>
-
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -55,7 +50,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
@@ -64,7 +58,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -86,11 +79,12 @@
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </Reference>
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="RxdkPackage.cs" />
     <Compile Include="RxdkPackageGuids.cs" />
-    <Compile Include="Options\RxdkOptionsPage.cs" />
+    <Compile Include="Options\RxdkOptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Commands\CommandIds.cs" />
     <Compile Include="Commands\RxdkCommands.cs" />
     <Compile Include="Commands\StartDebugInterceptor.cs" />
@@ -113,7 +107,6 @@
     <Compile Include="Services\DocsShell.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Page Include="ToolWindow\RxdkToolWindowControl.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -124,7 +117,6 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -151,14 +143,25 @@
       <VSIXSubPath>VcPlatform\%(RecursiveDir)</VSIXSubPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- Real Xbox platform, actually does things unlike the previous one -->
+    <Content Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\RXDK\**\*">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>ApplicationType\RXDK\%(RecursiveDir)</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\bin\$(Configuration)\Rxdk.MsBuild.dll">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>ApplicationType\RXDK\Current</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>false</Visible>
+    </Content>
   </ItemGroup>
-
   <ItemGroup>
     <VSCTCompile Include="RxdkPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>
-
   <ItemGroup>
     <!-- Command-bar bitmap strip referenced by the .vsct (6x 16x16 icons). The checked-in
          PNG is a colored-square placeholder; replace with real 16x16 command icons. -->
@@ -173,7 +176,6 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.9.3168" GeneratePathProperty="true">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -193,7 +195,6 @@
          runtime ships with VS 2022; this NuGet supplies the managed control + native loader. -->
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
   </ItemGroup>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--
     The VSSDK build/ targets (auto-imported by the NuGet package) only set env vars and
@@ -202,9 +203,7 @@
     old-style (non-SDK) csproj. GeneratePathProperty on the PackageReference above gives us
     $(PkgMicrosoft_VSSDK_BuildTools) to locate it in the restored package.
   -->
-  <Import Project="$(PkgMicrosoft_VSSDK_BuildTools)\tools\vssdk\Microsoft.VsSDK.targets"
-          Condition="Exists('$(PkgMicrosoft_VSSDK_BuildTools)\tools\vssdk\Microsoft.VsSDK.targets')" />
-
+  <Import Project="$(PkgMicrosoft_VSSDK_BuildTools)\tools\vssdk\Microsoft.VsSDK.targets" Condition="Exists('$(PkgMicrosoft_VSSDK_BuildTools)\tools\vssdk\Microsoft.VsSDK.targets')" />
   <!--
     Bundle the matching net8 engine (Rxdk.Cli + Rxdk.Dap, framework-dependent) into the VSIX
     under tools\. ToolLocator resolves <extensionDir>\tools FIRST, so the installed extension
@@ -224,23 +223,19 @@
     <Exec Command="dotnet publish &quot;$(MSBuildProjectDirectory)\..\external\RXDK-Tools\src\Rxdk.Dap\Rxdk.Dap.csproj&quot; -c $(Configuration) --no-self-contained -o &quot;$(EngineStageDir.TrimEnd('\'))&quot; -v quiet -nologo" />
     <ItemGroup>
       <!-- Ship the runnable closure, not debug/build cruft. -->
-      <_RxdkEngineFile Include="$(EngineStageDir)**\*"
-                       Exclude="$(EngineStageDir)**\*.pdb;$(EngineStageDir)**\*.xml" />
+      <_RxdkEngineFile Include="$(EngineStageDir)**\*" Exclude="$(EngineStageDir)**\*.pdb;$(EngineStageDir)**\*.xml" />
       <VSIXSourceItem Include="@(_RxdkEngineFile)">
         <VSIXSubPath>tools\%(RecursiveDir)</VSIXSubPath>
       </VSIXSourceItem>
     </ItemGroup>
   </Target>
-
   <!--
     Publish the VSIX under a versioned, product-branded name (rxdk-vs-<version>.vsix) beside the raw
     RxdkVs.Package.vsix the VSSDK produces, mirroring RXDK-VSCode's rxdk-vscode-<version>.vsix. The
     version is read from the vsixmanifest Identity so it can't drift from the extension's real version.
   -->
   <Target Name="RenameVsixToProductName" AfterTargets="CreateVsixContainer">
-    <XmlPeek XmlInputPath="$(MSBuildProjectDirectory)\source.extension.vsixmanifest"
-             Namespaces="&lt;Namespace Prefix='vsx' Uri='http://schemas.microsoft.com/developer/vsx-schema/2011' /&gt;"
-             Query="/vsx:PackageManifest/vsx:Metadata/vsx:Identity/@Version">
+    <XmlPeek XmlInputPath="$(MSBuildProjectDirectory)\source.extension.vsixmanifest" Namespaces="&lt;Namespace Prefix='vsx' Uri='http://schemas.microsoft.com/developer/vsx-schema/2011' /&gt;" Query="/vsx:PackageManifest/vsx:Metadata/vsx:Identity/@Version">
       <Output TaskParameter="Result" ItemName="_RxdkVsixVersion" />
     </XmlPeek>
     <PropertyGroup>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Original Xbox Lib (MSBuild)</Name>
+    <Description>A static library (.lib) for original Xbox titles - reference it from a game project's projectReferences. Builds with the RXDK clean-room Zig toolchain using MSBuild.</Description>
+    <Icon>Icon.png</Icon>
+    <ProjectType>VC</ProjectType>
+    <ProjectSubType></ProjectSubType>
+    <SortOrder>1020</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>XboxLib</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <LanguageTag>C++</LanguageTag>
+    <PlatformTag>xbox</PlatformTag>
+    <ProjectTypeTag>library</ProjectTypeTag>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="$safeprojectname$.vcxproj" File="MsBuildLib.vcxproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="false" TargetFileName="$safeprojectname$.vcxproj.filters">MsBuildLib.vcxproj.filters</ProjectItem>
+      <Folder Name="src" TargetFolderName="src">
+        <ProjectItem ReplaceParameters="false" TargetFileName="mylib.cpp">mylib.cpp</ProjectItem>
+      </Folder>
+      <Folder Name="include" TargetFolderName="include">
+        <ProjectItem ReplaceParameters="false" TargetFileName="mylib.h">mylib.h</ProjectItem>
+      </Folder>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

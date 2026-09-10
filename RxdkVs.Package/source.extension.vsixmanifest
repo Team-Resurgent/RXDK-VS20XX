@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <!-- Id is stable across versions; the trailing GUID keeps it globally unique. -->
-    <Identity Id="RxdkVs.Package.a069146d-e49e-4913-92cc-339495d0cd21"
-              Version="1.1.8"
-              Language="en-US"
-              Publisher="Team Resurgent" />
-    <DisplayName>RXDK for Visual Studio</DisplayName>
-    <Description xml:space="preserve">Original Xbox development: host tools, project templates, build, deploy, and debug (headers/libs from RXDK-SDK). A Visual Studio port of the RXDK VS Code extension.</Description>
-    <MoreInfo>https://github.com/Team-Resurgent/RXDK-VS20XX</MoreInfo>
-    <License>LICENSE.txt</License>
-    <Icon>Resources\extension-icon.png</Icon>
-    <PreviewImage>Resources\extension-icon.png</PreviewImage>
-    <Tags>xbox, original xbox, rxdk, homebrew, debug, native</Tags>
-  </Metadata>
-  <Installation>
-    <!-- [17.0,19.0) covers VS 2022 (17.x) through VS 2026 (18.x); the range is
+    <Metadata>
+        <!-- Id is stable across versions; the trailing GUID keeps it globally unique. -->
+        <Identity Id="RxdkVs.Package.a069146d-e49e-4913-92cc-339495d0cd21"
+                  Version="1.1.8"
+                  Language="en-US"
+                  Publisher="Team Resurgent" />
+        <DisplayName>RXDK for Visual Studio</DisplayName>
+        <Description xml:space="preserve">Original Xbox development: host tools, project templates, build, deploy, and debug (headers/libs from RXDK-SDK). A Visual Studio port of the RXDK VS Code extension, with .</Description>
+        <MoreInfo>https://github.com/Team-Resurgent/RXDK-VS20XX</MoreInfo>
+        <License>LICENSE.txt</License>
+        <Icon>Resources\extension-icon.png</Icon>
+        <PreviewImage>Resources\extension-icon.png</PreviewImage>
+        <Tags>xbox, original xbox, rxdk, homebrew, debug, native</Tags>
+    </Metadata>
+    <Installation>
+        <!-- [17.0,19.0) covers VS 2022 (17.x) through VS 2026 (18.x); the range is
          half-open so the next major (19.0) is excluded. Community/Pro/Enterprise. -->
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,19.0)">
-      <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
-  </Dependencies>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,19.0)" DisplayName="Visual Studio core editor" />
-  </Prerequisites>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Game.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Empty.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Lib.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox DXT.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Controller Input.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Font Scroller.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Network Server.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Video Player.zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Cube (Multi-Project).zip" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Music Visualizer (Multi-Project).zip" />
-  </Assets>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,19.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,19.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Game.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Empty.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Lib.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox DXT.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Controller Input.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Font Scroller.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Network Server.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Video Player.zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Cube (Multi-Project).zip" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="File" Path="ProjectTemplates" d:TargetPath="ProjectTemplates\Original Xbox Music Visualizer (Multi-Project).zip" />
+    </Assets>
 </PackageManifest>

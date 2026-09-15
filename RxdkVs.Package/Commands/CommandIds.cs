@@ -45,5 +45,6 @@ namespace RxdkVs.Package.Commands
         public const int CmdLaunchXemu = 0x011B;         // rxdk.launchXemu (build + boot ISO in xemu)
         public const int CmdInstallBuildTools = 0x011C;  // install MSVC v143 C++ build tools (VS Installer)
         public const int CmdInstallXboxPlatform = 0x011D; // install the custom 'Xbox' MSBuild platform (elevated)
+        public const int CmdImportVs20xxProject = 0x011E; // rxdk.importVs20xxProject (generate/regenerate rxdk.project.json from an existing .vcxproj)
     }
 }

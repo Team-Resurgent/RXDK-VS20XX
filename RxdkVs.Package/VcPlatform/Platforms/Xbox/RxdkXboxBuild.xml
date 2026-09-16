@@ -39,7 +39,7 @@
   <!-- ===== Compiler ===== -->
   <BoolProperty Name="RxdkExceptions" DisplayName="Enable C++ Exceptions"
                 Category="Compiler" Default="true"
-                Description="Compile C++ sources with exception support (-fexceptions). On by default -- RXDK's C++ runtime supports real DWARF exceptions on the console. Set to false (-fno-exceptions) to drop the EH tables when a title never throws." />
+                Description="Compile C++ sources with exception support (-fexceptions). On by default — RXDK's C++ runtime supports real DWARF exceptions on the console. Set to false (-fno-exceptions) to drop the EH tables when a title never throws." />
 
   <EnumProperty Name="RxdkCppStandard" DisplayName="C++ Language Standard"
                 Category="Compiler" Default="c++23"
@@ -49,30 +49,53 @@
     <EnumValue Name="c++23" DisplayName="ISO C++23 (-std=c++23)" />
   </EnumProperty>
 
-  <StringListProperty Name="RxdkDefines" DisplayName="Preprocessor Definitions"
+  <!-- Defines/IncludePaths/Libraries/LibraryPaths below persist under the real VC++ property
+       names (ClCompile.PreprocessorDefinitions, ClCompile.AdditionalIncludeDirectories,
+       Link.AdditionalDependencies, Link.AdditionalLibraryDirectories) instead of a custom
+       Rxdk*-prefixed property, via an item-metadata DataSource override — same storage a real
+       "Additional Dependencies"/Linker page would use, so a real VC++ project's values paste in
+       directly, IntelliSense picks them up on its own, and Platform.props reads them back as
+       ordinary item metadata (%(Link.AdditionalDependencies) etc.), not a flat property. -->
+  <StringListProperty Name="PreprocessorDefinitions" DisplayName="Preprocessor Definitions"
                       Category="Compiler" Separator=";"
-                      Description="Extra preprocessor macros passed to the compiler (in addition to the built-in _XBOX;XBOX). One per entry, e.g. MY_FLAG or NAME=VALUE." />
+                      Description="Extra preprocessor macros passed to the compiler (in addition to the built-in _XBOX;XBOX). One per entry, e.g. MY_FLAG or NAME=VALUE.">
+    <StringListProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="ClCompile" PersistedName="PreprocessorDefinitions" HasConfigurationCondition="true" />
+    </StringListProperty.DataSource>
+  </StringListProperty>
 
-  <StringListProperty Name="RxdkIncludePaths" DisplayName="Additional Include Directories"
+  <StringListProperty Name="AdditionalIncludeDirectories" DisplayName="Additional Include Directories"
                       Subtype="folder" Category="Compiler" Separator=";"
-                      Description="Extra project-relative directories searched for #include headers (added after sdk\include), e.g. src or third_party\include." />
+                      Description="Extra project-relative directories searched for #include headers (added after sdk\include), e.g. src or third_party\include.">
+    <StringListProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="ClCompile" PersistedName="AdditionalIncludeDirectories" HasConfigurationCondition="true" />
+    </StringListProperty.DataSource>
+  </StringListProperty>
 
   <StringListProperty Name="RxdkPublicIncludePaths" DisplayName="Public Include Directories"
                       Subtype="folder" Category="Compiler" Separator=";"
                       Description="For library projects: include directories exported to projects that reference this one (also usable locally). e.g. include." />
 
   <!-- ===== Linker ===== -->
-  <StringListProperty Name="RxdkLibraries" DisplayName="Libraries"
+  <StringListProperty Name="AdditionalDependencies" DisplayName="Additional Dependencies"
                       Category="Linker" Separator=";"
-                      Description="SDK libraries linked into the title, by name (order matters; libkernel is forced last automatically). e.g. libd3d8;libd3dx8;libxapi;libc;libcpp;libkernel." />
+                      Description="SDK libraries linked into the title, by exact filename including .lib — like a real Additional Dependencies list, nothing is appended automatically (order matters; libkernel.lib is forced last automatically). e.g. libd3d8.lib;libd3dx8.lib;libxapi.lib;libc.lib;libcpp.lib;libkernel.lib;libcompat.lib.">
+    <StringListProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="Link" PersistedName="AdditionalDependencies" HasConfigurationCondition="true" />
+    </StringListProperty.DataSource>
+  </StringListProperty>
 
-  <StringListProperty Name="RxdkLibraryPaths" DisplayName="Additional Library Directories"
+  <StringListProperty Name="AdditionalLibraryDirectories" DisplayName="Additional Library Directories"
                       Subtype="folder" Category="Linker" Separator=";"
-                      Description="Extra directories to resolve Libraries names from, searched after the SDK lib dir (project-relative or absolute). For linking your own prebuilt .lib by name." />
+                      Description="Extra directories to resolve Additional Dependencies names from, searched after the SDK lib dir (project-relative or absolute). For linking your own prebuilt .lib by name.">
+    <StringListProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="Link" PersistedName="AdditionalLibraryDirectories" HasConfigurationCondition="true" />
+    </StringListProperty.DataSource>
+  </StringListProperty>
 
-  <StringListProperty Name="RxdkAdditionalLibraries" DisplayName="Additional Dependencies"
+  <StringListProperty Name="RxdkAdditionalLibraries" DisplayName="Extra Prebuilt Libraries (Verbatim Paths)"
                       Category="Linker" Separator=";"
-                      Description="Explicit prebuilt static-library files to link, by path (project-relative or absolute .lib), in addition to the named Libraries above." />
+                      Description="Explicit prebuilt static-library files to link, by path (project-relative or absolute .lib), in addition to the named Additional Dependencies above. For a third-party .lib that isn't part of the SDK." />
 
   <!-- ===== Build Events ===== -->
   <StringProperty Name="RxdkPreBuildEvent" DisplayName="Pre-Build Event Command"

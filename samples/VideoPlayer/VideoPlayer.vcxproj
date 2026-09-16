@@ -25,8 +25,16 @@
     <PlatformToolset Condition="'$(PlatformToolset)' == ''">v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <!-- Real VC++ Linker property (Additional Dependencies): exact filenames
+         including .lib, nothing appended automatically — $(RxdkLibSuffix) is this
+         project's own explicit choice, same as picking libd3d8d.lib vs libd3d8.lib
+         by hand. -->
+    <Link>
+      <AdditionalDependencies>libxapi$(RxdkLibSuffix).lib;libd3d8$(RxdkLibSuffix).lib;libdsound$(RxdkLibSuffix).lib;libxmv$(RxdkLibSuffix).lib;libc$(RxdkLibSuffix).lib;libcpp$(RxdkLibSuffix).lib;libkernel$(RxdkLibSuffix).lib;libcompat$(RxdkLibSuffix).lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <PropertyGroup>
-    <RxdkLibraries>libxapi$(RxdkLibSuffix);libd3d8$(RxdkLibSuffix);libdsound$(RxdkLibSuffix);libxmv$(RxdkLibSuffix);libc$(RxdkLibSuffix);libcpp$(RxdkLibSuffix);libkernel$(RxdkLibSuffix);libcompat$(RxdkLibSuffix)</RxdkLibraries>
     <!-- Copied next to default.xbe on deploy (streamed at runtime). -->
     <RxdkDeployPaths>media/test.xmv</RxdkDeployPaths>
     <!-- Baked into the XBE as a named section (path|name). -->

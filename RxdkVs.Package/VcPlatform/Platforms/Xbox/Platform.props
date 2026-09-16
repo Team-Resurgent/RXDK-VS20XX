@@ -43,8 +43,8 @@
 
     <!-- Classic XDK "$(D)" token: Debug libs live in the same flat sdk\lib as Release, distinguished
          only by this suffix on the filename (libd3d8d.lib vs libd3d8.lib). A project's RxdkLibraries
-         names the exact file it wants using this token -- same as a real "Additional Dependencies"
-         list -- the engine never appends it on its own. -->
+         names the exact file it wants using this token — same as a real "Additional Dependencies"
+         list — the engine never appends it on its own. -->
     <RxdkLibSuffix Condition="'$(RxdkBuildFlavor)' == 'Debug'">d</RxdkLibSuffix>
     <RxdkLibSuffix Condition="'$(RxdkLibSuffix)' == ''"></RxdkLibSuffix>
 
@@ -75,7 +75,7 @@
 
   <!-- Makefile-project command lines + IntelliSense standard. RxdkGenerateProjectJson (below) writes
        the committed rxdk.project.json from the .vcxproj before the build; the engine then reads that
-       and selects the configuration -- the exact same call the VS Code / Open Folder flows make, so
+       and selects the configuration — the exact same call the VS Code / Open Folder flows make, so
        all three share one build path. -->
   <PropertyGroup>
     <NMakeBuildCommandLine>"$(RxdkCli)" build --project-root "$(MSBuildProjectDirectory)" --configuration $(Configuration)</NMakeBuildCommandLine>
@@ -131,7 +131,7 @@
        Debug and Release. RxdkGenerateProjectJson re-enters the project once per ProjectConfiguration
        (via the <MSBuild> task -> _RxdkCollectConfig), collecting each config's fully-evaluated Rxdk*
        properties + @(ClCompile), then RxdkWriteProjectJson merges them into ONE multi-config
-       rxdk.project.json at the project root -- the same committed file VS Code / Open Folder use.
+       rxdk.project.json at the project root — the same committed file VS Code / Open Folder use.
        Fields identical across all configs are hoisted to the top level; only the ones that differ
        (configuration, outputDir, per-config defines, …) stay under "configurations". -->
   <UsingTask TaskName="RxdkWriteProjectJson" TaskFactory="RoslynCodeTaskFactory"
@@ -301,18 +301,36 @@
   <Target Name="_RxdkCollectConfig" Returns="@(RxdkOneConfig)">
     <ItemGroup>
       <RxdkResourceFile Include="@(None)" Condition="'%(Extension)' == '.rdf' or '%(Extension)' == '.xap'" />
+      <!-- A Link item exists only so the ItemDefinitionGroup's <Link> defaults (a project's own
+           AdditionalDependencies / AdditionalLibraryDirectories — the real VC++ Linker property
+           names, so the standard "Additional Dependencies"-style editing flow works) become
+           readable metadata: Makefile projects never emit a real linker invocation, so MSBuild
+           never creates @(Link) on its own. -->
+      <Link Include="$(MSBuildProjectName)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <!-- ClCompile items are the project's real source files (@(ClCompile) below), which all
+           share the same ItemDefinitionGroup-derived AdditionalIncludeDirectories /
+           PreprocessorDefinitions unless a template overrides them per-file (none do) —
+           ->Distinct() collapses the per-file duplicates down to that one shared value. -->
+      <RxdkResolvedIncludePaths>@(ClCompile->'%(AdditionalIncludeDirectories)'->Distinct())</RxdkResolvedIncludePaths>
+      <RxdkResolvedDefines>@(ClCompile->'%(PreprocessorDefinitions)'->Distinct())</RxdkResolvedDefines>
+      <RxdkResolvedLibraries>@(Link->'%(AdditionalDependencies)'->Distinct())</RxdkResolvedLibraries>
+      <RxdkResolvedLibraryPaths>@(Link->'%(AdditionalLibraryDirectories)'->Distinct())</RxdkResolvedLibraryPaths>
+    </PropertyGroup>
+    <ItemGroup>
       <RxdkOneConfig Include="$(Configuration)">
         <Type>$(RxdkType)</Type>
         <ConfigVariant>$(RxdkConfig)</ConfigVariant>
         <OutputDir>$(RxdkOutDir)</OutputDir>
         <Sources>@(ClCompile)</Sources>
         <Resources>@(RxdkResourceFile)</Resources>
-        <Libraries>$(RxdkLibraries)</Libraries>
-        <LibraryPaths>$(RxdkLibraryPaths)</LibraryPaths>
+        <Libraries>$(RxdkResolvedLibraries)</Libraries>
+        <LibraryPaths>$(RxdkResolvedLibraryPaths)</LibraryPaths>
         <AdditionalLibraries>$(RxdkAdditionalLibraries)</AdditionalLibraries>
         <PublicIncludePaths>$(RxdkPublicIncludePaths)</PublicIncludePaths>
-        <IncludePaths>$(RxdkIncludePaths)</IncludePaths>
-        <Defines>$(RxdkDefines)</Defines>
+        <IncludePaths>$(RxdkResolvedIncludePaths)</IncludePaths>
+        <Defines>$(RxdkResolvedDefines)</Defines>
         <CppStandard>$(RxdkCppStandard)</CppStandard>
         <Exceptions>$(RxdkExceptions)</Exceptions>
         <Incremental>$(RxdkIncrementalBuild)</Incremental>

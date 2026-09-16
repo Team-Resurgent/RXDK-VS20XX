@@ -25,8 +25,16 @@
     <PlatformToolset Condition="'$(PlatformToolset)' == ''">v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <!-- Real VC++ Linker property (Additional Dependencies): exact filenames
+         including .lib, nothing appended automatically — $(RxdkLibSuffix) is this
+         project's own explicit choice, same as picking libd3d8d.lib vs libd3d8.lib
+         by hand. -->
+    <Link>
+      <AdditionalDependencies>libd3d8$(RxdkLibSuffix).lib;libdsound$(RxdkLibSuffix).lib;libxapi$(RxdkLibSuffix).lib;libc$(RxdkLibSuffix).lib;libcpp$(RxdkLibSuffix).lib;libkernel$(RxdkLibSuffix).lib;libcompat$(RxdkLibSuffix).lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <PropertyGroup>
-    <RxdkLibraries>libd3d8$(RxdkLibSuffix);libdsound$(RxdkLibSuffix);libxapi$(RxdkLibSuffix);libc$(RxdkLibSuffix);libcpp$(RxdkLibSuffix);libkernel$(RxdkLibSuffix);libcompat$(RxdkLibSuffix)</RxdkLibraries>
     <RxdkDeployPaths>media</RxdkDeployPaths>
     <NMakeOutput>$(MSBuildProjectDirectory)\$(RxdkOutDir)\$(MSBuildProjectName).xbe</NMakeOutput>
   </PropertyGroup>

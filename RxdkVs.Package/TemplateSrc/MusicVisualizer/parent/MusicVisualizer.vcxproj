@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Xbox">
@@ -27,7 +27,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
     <!-- Sibling vorbis decoder library, linked via projectReferences (built first below). -->
-    <RxdkLibraries>libd3d8;libdsound;libxapi;libc;libcpp;libkernel</RxdkLibraries>
+    <RxdkLibraries>libd3d8$(RxdkLibSuffix);libdsound$(RxdkLibSuffix);libxapi$(RxdkLibSuffix);libc$(RxdkLibSuffix);libcpp$(RxdkLibSuffix);libkernel$(RxdkLibSuffix);libcompat$(RxdkLibSuffix)</RxdkLibraries>
     <!-- The media\ folder (music.ogg) is streamed at runtime and staged into the ISO. -->
     <RxdkDeployPaths>media</RxdkDeployPaths>
     <NMakeOutput>$(MSBuildProjectDirectory)\$(RxdkOutDir)\$(MSBuildProjectName).xbe</NMakeOutput>

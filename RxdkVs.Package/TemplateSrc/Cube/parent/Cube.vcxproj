@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Xbox">
@@ -26,7 +26,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <RxdkLibraries>libd3d8;libd3dx8;libxapi;libc;libcpp;libkernel</RxdkLibraries>
+    <RxdkLibraries>libd3d8$(RxdkLibSuffix);libd3dx8$(RxdkLibSuffix);libxapi$(RxdkLibSuffix);libc$(RxdkLibSuffix);libcpp$(RxdkLibSuffix);libkernel$(RxdkLibSuffix);libcompat$(RxdkLibSuffix)</RxdkLibraries>
     <NMakeOutput>$(MSBuildProjectDirectory)\$(RxdkOutDir)\$(MSBuildProjectName).xbe</NMakeOutput>
   </PropertyGroup>
   <ItemGroup>

@@ -41,6 +41,13 @@
     <RxdkConfig Condition="'$(RxdkBuildFlavor)' == 'Debug'">debug</RxdkConfig>
     <RxdkConfig Condition="'$(RxdkConfig)' == ''">release</RxdkConfig>
 
+    <!-- Classic XDK "$(D)" token: Debug libs live in the same flat sdk\lib as Release, distinguished
+         only by this suffix on the filename (libd3d8d.lib vs libd3d8.lib). A project's RxdkLibraries
+         names the exact file it wants using this token -- same as a real "Additional Dependencies"
+         list -- the engine never appends it on its own. -->
+    <RxdkLibSuffix Condition="'$(RxdkBuildFlavor)' == 'Debug'">d</RxdkLibSuffix>
+    <RxdkLibSuffix Condition="'$(RxdkLibSuffix)' == ''"></RxdkLibSuffix>
+
     <!-- Build-manifest defaults (a project overrides RxdkType/RxdkLibraries/etc. as needed). -->
     <RxdkType Condition="'$(RxdkType)' == ''">executable</RxdkType>
     <RxdkStackSize Condition="'$(RxdkStackSize)' == ''">65536</RxdkStackSize>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Xbox">
@@ -30,7 +30,7 @@
     <RxdkType>dxt</RxdkType>
     <!-- libxapi: libc routes malloc at the RTL heap, which RXDK implements there
          rather than in the kernel. Only the heap members get pulled in. -->
-    <RxdkLibraries>libxbdm;libkernel;libc;libxapi</RxdkLibraries>
+    <RxdkLibraries>libxbdm$(RxdkLibSuffix);libkernel$(RxdkLibSuffix);libc$(RxdkLibSuffix);libxapi$(RxdkLibSuffix);libcompat$(RxdkLibSuffix)</RxdkLibraries>
     <RxdkConfig>release</RxdkConfig>
     <NMakeOutput>$(MSBuildProjectDirectory)\$(RxdkOutDir)\$(MSBuildProjectName).dxt</NMakeOutput>
   </PropertyGroup>

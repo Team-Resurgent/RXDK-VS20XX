@@ -77,6 +77,7 @@ namespace RxdkVs.Package.ToolWindow
         // Project
         private void OnImportProject(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdImportProject);
         private void OnImportVs20xxProject(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdImportVs20xxProject);
+        private void OnImportVsCodeProject(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdImportVsCodeProject);
         // Setup — one button orchestrates all installers; the individual commands
         // (CmdInstallBuildTools/CmdInstallXboxPlatform/CmdInstallDotNet) remain on the RXDK menu.
         private void OnCompleteSetup(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdSetupPrerequisites);

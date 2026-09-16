@@ -92,6 +92,7 @@ namespace RxdkVs.Package.Commands
             Add(CommandIds.CmdNewProject, NewProjectAsync);
             Add(CommandIds.CmdImportProject, ImportProjectAsync);
             Add(CommandIds.CmdImportVs20xxProject, ImportVs20xxProjectAsync);
+            Add(CommandIds.CmdImportVsCodeProject, ImportVsCodeProjectAsync);
             Add(CommandIds.CmdShowToolWindow, ShowToolWindowAsync);
             Add(CommandIds.CmdOpenSdkFolder, () => OpenFolderAsync(ToolLocator.StagedSdkRoot));
             Add(CommandIds.CmdOpenToolsFolder, () => OpenFolderAsync(ToolLocator.StagedToolsRoot));
@@ -453,6 +454,82 @@ namespace RxdkVs.Package.Commands
             try { dte?.ItemOperations.OpenFile(manifestPath); } catch { /* best effort */ }
 
             await ShowInfoAsync($"Generated rxdk.project.json for {projectName}.");
+        }
+
+        // ---- VSCode (Open Folder) project import: generate a .vcxproj/.sln from rxdk.project.json ----
+
+        // The reverse of ImportVs20xxProjectAsync above: a project created the VS Code / Open Folder
+        // way has an rxdk.project.json but no MSBuild project at all, so it can't be opened in Visual
+        // Studio until one is generated. Runs Rxdk.Cli's generate-vcxproj (Rxdk.Engine's
+        // VcxprojExporter), the reverse of the RxdkGenerateProjectJson MSBuild target.
+        private async Task ImportVsCodeProjectAsync()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            string projectRoot;
+            using (var fbd = new System.Windows.Forms.FolderBrowserDialog { Description = "Select the RXDK VSCode project folder (containing rxdk.project.json)" })
+            {
+                if (fbd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                {
+                    return; // cancelled
+                }
+                projectRoot = fbd.SelectedPath;
+            }
+
+            var manifestPath = Path.Combine(projectRoot, "rxdk.project.json");
+            if (!File.Exists(manifestPath))
+            {
+                await ShowErrorAsync($"No rxdk.project.json found in:\n{projectRoot}\n\nSelect the project's own folder (the one the .vscode tasks/launch config sit next to).");
+                return;
+            }
+            var projectName = ReadProjectName(projectRoot);
+
+            var existingVcxproj = Directory.GetFiles(projectRoot, "*.vcxproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            if (existingVcxproj != null)
+            {
+                var regen = VsShellUtilities.ShowMessageBox(_package,
+                    $"{Path.GetFileName(existingVcxproj)} already exists for {projectName}:\n{existingVcxproj}\n\n" +
+                    "Regenerate it (and its .sln) from rxdk.project.json now? This overwrites both files.",
+                    "RXDK", OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_SECOND);
+                if (regen != (int)VSConstants.MessageBoxResult.IDYES)
+                {
+                    return;
+                }
+            }
+
+            int rc;
+            try
+            {
+                rc = await _cli.RunAsync(new[] { "generate-vcxproj", "--project-root", projectRoot }, projectRoot);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync($"generate-vcxproj failed: {ex.Message}");
+                return;
+            }
+            if (rc != 0)
+            {
+                await ShowErrorAsync("Could not generate a .vcxproj/.sln — see the RXDK output window for details.");
+                return;
+            }
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            var dte = (EnvDTE.DTE)await _package.GetServiceAsync(typeof(EnvDTE.DTE));
+            var producedSln = Directory.GetFiles(projectRoot, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            if (producedSln != null && dte != null)
+            {
+                var hasOpen = dte.Solution != null && dte.Solution.IsOpen;
+                var go = !hasOpen ? (int)VSConstants.MessageBoxResult.IDYES : VsShellUtilities.ShowMessageBox(_package,
+                    $"Generated {Path.GetFileName(producedSln)} for {projectName}.\n\nOpen it now? This closes the current solution.", "RXDK",
+                    OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                if (go == (int)VSConstants.MessageBoxResult.IDYES)
+                {
+                    try { dte.Solution.Open(producedSln); }
+                    catch (Exception ex) { await ShowErrorAsync($"Generated OK but could not open the solution: {ex.Message}"); }
+                }
+                return;
+            }
+            await ShowInfoAsync($"Generated a .vcxproj/.sln for {projectName} in {projectRoot}.");
         }
 
         // Cheap textual check: does the .vcxproj declare at least one ProjectConfiguration whose

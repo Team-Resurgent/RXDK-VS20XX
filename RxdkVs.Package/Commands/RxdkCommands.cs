@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -91,7 +90,6 @@ namespace RxdkVs.Package.Commands
             Add(CommandIds.CmdDebug, DebugAsync);
             Add(CommandIds.CmdNewProject, NewProjectAsync);
             Add(CommandIds.CmdImportProject, ImportProjectAsync);
-            Add(CommandIds.CmdImportVs20xxProject, ImportVs20xxProjectAsync);
             Add(CommandIds.CmdImportVsCodeProject, ImportVsCodeProjectAsync);
             Add(CommandIds.CmdShowToolWindow, ShowToolWindowAsync);
             Add(CommandIds.CmdOpenSdkFolder, () => OpenFolderAsync(ToolLocator.StagedSdkRoot));
@@ -350,112 +348,6 @@ namespace RxdkVs.Package.Commands
             catch { /* best effort */ }
         }
 
-        // ---- VS20XX (modern .vcxproj) project import: generate/regenerate rxdk.project.json ----
-
-        // The committed rxdk.project.json is normally (re)written by the RxdkGenerateProjectJson
-        // MSBuild target every time an RXDK Xbox project builds (Platform.targets, BeforeTargets=
-        // "Build;Rebuild"). This command runs that same target on demand against a .vcxproj the user
-        // picks -- e.g. a project freshly cloned from git that has never been built, so it has no
-        // manifest yet -- without requiring the project to already be part of an open solution.
-        private async Task ImportVs20xxProjectAsync()
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var ofd = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "Visual C++ project (*.vcxproj)|*.vcxproj|All files (*.*)|*.*",
-                Title = "Select the RXDK VS20XX project (.vcxproj)",
-            };
-            if (ofd.ShowDialog() != true)
-            {
-                return; // cancelled
-            }
-            var vcxprojPath = ofd.FileName;
-            var projectRoot = Path.GetDirectoryName(vcxprojPath);
-            var projectName = Path.GetFileNameWithoutExtension(vcxprojPath);
-
-            // Validate up front, cheaply (no MSBuild evaluation needed): an RXDK project always
-            // declares a Debug|Xbox / Release|Xbox configuration -- only the "Xbox" platform this
-            // extension installs is named that, so this is a reliable, fast signal that doesn't
-            // require the platform to actually be installed just to check.
-            if (!VcxprojDeclaresXboxPlatform(vcxprojPath, out var reason))
-            {
-                await ShowErrorAsync(
-                    $"{Path.GetFileName(vcxprojPath)} doesn't look like an RXDK VS20XX project ({reason}).\n\n" +
-                    "RXDK Xbox projects declare a Debug|Xbox / Release|Xbox configuration. If this is meant to be " +
-                    "one, check the Platform in Configuration Manager, or re-add it from an RXDK project template.");
-                return;
-            }
-
-            var manifestPath = Path.Combine(projectRoot, "rxdk.project.json");
-            if (File.Exists(manifestPath))
-            {
-                var regen = VsShellUtilities.ShowMessageBox(_package,
-                    $"rxdk.project.json already exists for {projectName}:\n{manifestPath}\n\n" +
-                    "Regenerate it from the .vcxproj now? This overwrites the existing file with the " +
-                    "current build settings (any hand edits to it will be lost).",
-                    "RXDK", OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_SECOND);
-                if (regen != (int)VSConstants.MessageBoxResult.IDYES)
-                {
-                    return;
-                }
-            }
-
-            var msbuild = FindMsBuildExe();
-            if (msbuild == null)
-            {
-                await ShowErrorAsync("Could not find MSBuild.exe (checked via vswhere). Is Visual Studio installed correctly?");
-                return;
-            }
-
-            var psi = new ProcessStartInfo
-            {
-                FileName = msbuild,
-                // Configuration is required to evaluate the project at all, but the target itself
-                // re-enters and collects EVERY configuration (Debug + Release) into one manifest --
-                // see _RxdkCollectConfig / RxdkGenerateProjectJson in Platform.targets.
-                Arguments = $"\"{vcxprojPath}\" /t:RxdkGenerateProjectJson /p:Platform=Xbox /p:Configuration=Release /nologo /v:minimal",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                WorkingDirectory = projectRoot,
-            };
-
-            string stdout, stderr;
-            int exitCode;
-            try
-            {
-                using (var p = Process.Start(psi))
-                {
-                    stdout = await p.StandardOutput.ReadToEndAsync();
-                    stderr = await p.StandardError.ReadToEndAsync();
-                    p.WaitForExit(120000);
-                    exitCode = p.ExitCode;
-                }
-            }
-            catch (Exception ex)
-            {
-                await ShowErrorAsync($"Could not run MSBuild: {ex.Message}");
-                return;
-            }
-
-            if (exitCode != 0 || !File.Exists(manifestPath))
-            {
-                var log = string.Join("\n", new[] { stdout, stderr }.Where(s => !string.IsNullOrWhiteSpace(s)));
-                await ShowErrorAsync(
-                    $"Could not generate rxdk.project.json for {projectName} (MSBuild exit {exitCode}).\n\n" +
-                    "If the \"Xbox\" platform isn't installed, run RXDK > Install Xbox Platform first, then retry.\n\n" +
-                    (log.Length > 1500 ? log.Substring(log.Length - 1500) : log));
-                return;
-            }
-
-            var dte = (EnvDTE.DTE)await _package.GetServiceAsync(typeof(EnvDTE.DTE));
-            try { dte?.ItemOperations.OpenFile(manifestPath); } catch { /* best effort */ }
-
-            await ShowInfoAsync($"Generated rxdk.project.json for {projectName}.");
-        }
-
         // ---- VSCode (Open Folder) project import: generate a .vcxproj/.sln from rxdk.project.json ----
 
         // The reverse of ImportVs20xxProjectAsync above: a project created the VS Code / Open Folder
@@ -530,64 +422,6 @@ namespace RxdkVs.Package.Commands
                 return;
             }
             await ShowInfoAsync($"Generated a .vcxproj/.sln for {projectName} in {projectRoot}.");
-        }
-
-        // Cheap textual check: does the .vcxproj declare at least one ProjectConfiguration whose
-        // Platform is "Xbox"? Doesn't require the Xbox platform to be installed or the project to
-        // be evaluable -- just that it was created as (or converted to) an RXDK project.
-        private static bool VcxprojDeclaresXboxPlatform(string vcxprojPath, out string reason)
-        {
-            try
-            {
-                var doc = XDocument.Load(vcxprojPath);
-                XNamespace ns = doc.Root?.GetDefaultNamespace() ?? XNamespace.None;
-                var hasXbox = doc.Descendants(ns + "ProjectConfiguration")
-                    .Select(pc => (string)pc.Element(ns + "Platform"))
-                    .Any(p => string.Equals(p?.Trim(), "Xbox", StringComparison.OrdinalIgnoreCase));
-                reason = hasXbox ? null : "no Debug|Xbox / Release|Xbox configuration found";
-                return hasXbox;
-            }
-            catch (Exception ex)
-            {
-                reason = $"could not read the .vcxproj: {ex.Message}";
-                return false;
-            }
-        }
-
-        // Locate MSBuild.exe for the running (or newest installed) Visual Studio via vswhere,
-        // the same discovery FindXboxPlatformDests/InstallBuildToolsAsync use elsewhere.
-        private static string FindMsBuildExe()
-        {
-            var pf86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-            var vswhere = Path.Combine(pf86, "Microsoft Visual Studio", "Installer", "vswhere.exe");
-            if (!File.Exists(vswhere))
-            {
-                return null;
-            }
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = vswhere,
-                    Arguments = "-latest -prerelease -requires Microsoft.Component.MSBuild -property installationPath",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                };
-                string outp;
-                using (var p = Process.Start(psi)) { outp = p.StandardOutput.ReadToEnd(); p.WaitForExit(10000); }
-                var install = outp.Trim();
-                if (install.Length == 0)
-                {
-                    return null;
-                }
-                var msbuild = Path.Combine(install, "MSBuild", "Current", "Bin", "MSBuild.exe");
-                return File.Exists(msbuild) ? msbuild : null;
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         // ---- Tool window ----

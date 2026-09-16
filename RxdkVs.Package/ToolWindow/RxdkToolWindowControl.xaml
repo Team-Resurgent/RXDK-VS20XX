@@ -124,7 +124,6 @@
             <!-- Project -->
             <TextBlock Text="PROJECT" Style="{StaticResource Section}" />
             <Button Style="{StaticResource Act}" Content="Import VS2003 Project / Solution…" Click="OnImportProject" />
-            <Button Style="{StaticResource Act}" Content="Import VS20XX Project…" Click="OnImportVs20xxProject" />
             <Button Style="{StaticResource Act}" Content="Import VSCode Project…" Click="OnImportVsCodeProject" />
 
             <!-- Setup -->

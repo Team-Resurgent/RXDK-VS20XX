@@ -143,14 +143,21 @@
       <VSIXSubPath>VcPlatform\%(RecursiveDir)</VSIXSubPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Real Xbox platform, actually does things unlike the previous one -->
-    <Content Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\RXDK\**\*">
+    <!-- Real Xbox platform, actually does things unlike the previous one.
+         $(MSBuildThisFileDirectory), not $(SolutionDir): SolutionDir is only auto-populated when
+         the BUILD ENTRY POINT is the .sln (devenv, or `msbuild RXDK-VS20XX.sln`): scripts/dev.ps1
+         builds this .csproj directly, which silently left SolutionDir empty, the glob below matched
+         nothing, and every dev.ps1-built VSIX shipped with zero ApplicationType\RXDK files (the
+         "Install Xbox Platform" command then failed with "RXDK Application Type files not found"
+         even though it copied a real VSIX). MSBuildThisFileDirectory always resolves regardless of
+         how this project is invoked. -->
+    <Content Include="$(MSBuildThisFileDirectory)..\external\RXDK-Tools\src\Rxdk.MsBuild\RXDK\**\*">
       <IncludeInVSIX>true</IncludeInVSIX>
       <VSIXSubPath>ApplicationType\RXDK\%(RecursiveDir)</VSIXSubPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\bin\$(Configuration)\Rxdk.MsBuild.dll">
+    <Content Include="$(MSBuildThisFileDirectory)..\external\RXDK-Tools\src\Rxdk.MsBuild\bin\$(Configuration)\Rxdk.MsBuild.dll">
       <IncludeInVSIX>true</IncludeInVSIX>
       <VSIXSubPath>ApplicationType\RXDK\Current</VSIXSubPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -163,7 +170,7 @@
          run before Rxdk.MsBuild.csproj has finished writing that file (MSB3030: file not found).
          ReferenceOutputAssembly=false: this package never links against it as code, so it's a
          build-order dependency only, not a real assembly reference. -->
-    <ProjectReference Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\Rxdk.MsBuild.csproj">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\external\RXDK-Tools\src\Rxdk.MsBuild\Rxdk.MsBuild.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>

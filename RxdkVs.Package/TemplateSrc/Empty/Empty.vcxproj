@@ -43,6 +43,11 @@
   <ItemDefinitionGroup>
     <Link>
       <LibraryDependencies>libxapi$(D);libc$(D);libkernel$(D)</LibraryDependencies>
+      <!-- libcompat$(D) needs an explicit whole-archive wrap to win a COMDAT tie-break against
+           zig's bundled compiler-rt (fabs/sqrt/sin/...); see Rxdk.MsBuild.props' own comment.
+           A plain "-lNAME" in LibraryDependencies only pulls referenced objects, which defeats
+           the point, so it's linked here instead of listed there. -->
+      <AdditionalOptions>%(Link.AdditionalOptions) -Wl,--whole-archive -llibcompat$(D) -Wl,--no-whole-archive</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

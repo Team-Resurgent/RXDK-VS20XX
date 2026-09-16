@@ -158,6 +158,16 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <!-- The Content item above copies Rxdk.MsBuild.dll by raw path, which gives MSBuild no build-
+         order signal on its own: under a parallel (multi-proc, the default) build, the copy can
+         run before Rxdk.MsBuild.csproj has finished writing that file (MSB3030: file not found).
+         ReferenceOutputAssembly=false: this package never links against it as code, so it's a
+         build-order dependency only, not a real assembly reference. -->
+    <ProjectReference Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\Rxdk.MsBuild.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <VSCTCompile Include="RxdkPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>

@@ -18,7 +18,6 @@
   </TemplateData>
   <TemplateContent>
     <Project TargetFileName="$safeprojectname$.vcxproj" File="VideoPlayer.vcxproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="rxdk.project.json">rxdk.project.json</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="$safeprojectname$.vcxproj.filters">VideoPlayer.vcxproj.filters</ProjectItem>
       <Folder Name="src" TargetFolderName="src">
         <ProjectItem ReplaceParameters="false" TargetFileName="main.cpp">main.cpp</ProjectItem>

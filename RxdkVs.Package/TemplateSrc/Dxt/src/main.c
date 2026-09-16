@@ -9,8 +9,9 @@
 // XAPI, no D3D, no CRT startup.
 //
 // Build: links libxbdm.lib (Dm* by ordinal) + libkernel.lib (xboxkrnl.exe by
-// ordinal) + libc (sprintf/str*), then imagebld /DXT flattens it into a .dxt.
-// Deploy copies it to E:\dxt and warm-reboots so xbdm loads it.
+// ordinal) + libc (sprintf/str*) + libxapi (heap object only -- sprintf's MSVC
+// format-string fallback can call malloc), then imagebld /DXT flattens it into
+// a .dxt. Deploy copies it to E:\dxt and warm-reboots so xbdm loads it.
 //
 // NOTE: the FPS/memory overlay only draws while a Direct3D title is running (it
 // reads that title's "frames" performance counter) -- on the dashboard it stays

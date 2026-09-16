@@ -16,7 +16,6 @@
   </TemplateData>
   <TemplateContent>
     <Project TargetFileName="cubemesh.vcxproj" File="cubemesh.vcxproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="false" TargetFileName="rxdk.project.json">rxdk.project.json</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="cubemesh.vcxproj.filters">cubemesh.vcxproj.filters</ProjectItem>
       <Folder Name="src" TargetFolderName="src">
         <ProjectItem ReplaceParameters="false" TargetFileName="cubemesh.cpp">cubemesh.cpp</ProjectItem>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Xbox">
@@ -13,37 +13,46 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{$guid1$}</ProjectGuid>
+    <Keyword>RXDK</Keyword>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <ApplicationType>RXDK</ApplicationType>
+    <ApplicationTypeRevision>Current</ApplicationTypeRevision>
     <RootNamespace>XboxNamespace</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>$safeprojectname$</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
-    <PlatformToolset Condition="'$(VisualStudioVersion)' == '17.0'">v143</PlatformToolset>
-    <PlatformToolset Condition="'$(VisualStudioVersion)' == '18.0'">v145</PlatformToolset>
-    <PlatformToolset Condition="'$(PlatformToolset)' == ''">v143</PlatformToolset>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Xbox'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>RXDK</PlatformToolset>
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Xbox'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>RXDK</PlatformToolset>
+    <ConfigurationType>Application</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <!-- libd3d8$(D);libd3dx8$(D);libxapi$(D);libc$(D);libcpp$(D);libkernel$(D) is Rxdk.MsBuild.props'
+       own default LibraryDependencies, so this template just inherits it rather than repeating it. -->
+  <!-- cubemesh's PublicIncludePaths (include) isn't picked up here automatically: named explicitly,
+       like every other RXDK dependency this session; see Rxdk.MsBuild.targets' ClCompile target
+       for why RxdkAdditionalIncludeDirectories, not the real AdditionalIncludeDirectories name. -->
   <ItemDefinitionGroup>
-    <!-- Real VC++ Linker property (Additional Dependencies): exact filenames
-         including .lib, nothing appended automatically — $(RxdkLibSuffix) is this
-         project's own explicit choice, same as picking libd3d8d.lib vs libd3d8.lib
-         by hand. -->
-    <Link>
-      <AdditionalDependencies>libd3d8$(RxdkLibSuffix).lib;libd3dx8$(RxdkLibSuffix).lib;libxapi$(RxdkLibSuffix).lib;libc$(RxdkLibSuffix).lib;libcpp$(RxdkLibSuffix).lib;libkernel$(RxdkLibSuffix).lib;libcompat$(RxdkLibSuffix).lib</AdditionalDependencies>
-    </Link>
+    <ClCompile>
+      <RxdkAdditionalIncludeDirectories>..\cubemesh\include</RxdkAdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
-  <PropertyGroup>
-    <NMakeOutput>$(MSBuildProjectDirectory)\$(RxdkOutDir)\$(MSBuildProjectName).xbe</NMakeOutput>
-  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Reference the child library. Build order + RXDK linking are automatic: Rxdk.Xbox.props
-         defaults every reference to build-order-only (no warning), and the build derives the
-         link from it - so adding a library reference through VS needs no hand-editing. -->
+    <!-- Real static-library project reference: MSBuild builds cubemesh first and links its .lib in
+         automatically, the standard way, no manifest/projectReferences list needed. -->
     <ProjectReference Include="..\cubemesh\cubemesh.vcxproj">
       <Project>{C5555555-5555-4555-8555-555555555555}</Project>
     </ProjectReference>

@@ -16,7 +16,6 @@
   </TemplateData>
   <TemplateContent>
     <Project TargetFileName="vorbis.vcxproj" File="vorbis.vcxproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="false" TargetFileName="rxdk.project.json">rxdk.project.json</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="vorbis.vcxproj.filters">vorbis.vcxproj.filters</ProjectItem>
       <Folder Name="src" TargetFolderName="src">
         <ProjectItem ReplaceParameters="false" TargetFileName="stb_vorbis_impl.c">stb_vorbis_impl.c</ProjectItem>

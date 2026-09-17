@@ -202,17 +202,21 @@ namespace RxdkVs.Package.ToolWindow
                     ? Visibility.Collapsed : Visibility.Visible;
             }
 
-            // Hide "Install Prerequisites" once everything the installer (or a prior setup run) would
-            // do is already present: the VS-side prerequisites (.NET 8, MSVC v143, the Xbox platform)
-            // plus the core CLI components (SDK + host tools). Marketplace-installed users, who have
-            // none of this yet, still see the button. Left visible if state is unknown (no rows).
+            // The setup button is ALWAYS available -- when nothing is set up yet it reads "Install
+            // Prerequisites"; once everything the installer (.NET 8, MSVC v143, the Xbox platform, SDK
+            // + host tools) is present it becomes "Reinstall Build Tools", a repair path. Reinstall
+            // matters because the platform payload is version-stamped: a same-version VSIX (a dev
+            // rebuild, or a hotfix that keeps the version) leaves a STALE toolset in VCTargetsPath
+            // that the "current" check can't see, and there was previously no way to force a refresh.
+            // Complete Setup re-copies the platform unconditionally (see SetupPrerequisitesAsync).
             if (InstallPrereqsButton != null)
             {
                 var sdk = rows.FirstOrDefault(r => r.Name == "SDK");
                 var tools = rows.FirstOrDefault(r => r.Name == "Tools");
                 var coreComponents = sdk != null && sdk.Installed && tools != null && tools.Installed;
                 var allReady = coreComponents && RxdkCommands.VsSidePrerequisitesInstalled();
-                InstallPrereqsButton.Visibility = allReady ? Visibility.Collapsed : Visibility.Visible;
+                InstallPrereqsButton.Content = allReady ? "Reinstall Build Tools" : "Install Prerequisites";
+                InstallPrereqsButton.Visibility = Visibility.Visible;
             }
 
             if (rows.Count == 0)

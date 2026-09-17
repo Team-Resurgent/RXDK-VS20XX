@@ -16,9 +16,10 @@ namespace RxdkVs.Package.Services
     /// interceptor (StartDebugInterceptor).
     ///
     /// Everything is read from the project's MSBuild properties (the .vcxproj), NOT from
-    /// rxdk.project.json: the <c>RxdkXbox</c> marker identifies an Xbox project, and
-    /// <c>NMakeOutput</c> gives the built .xbe from which the .exe/.pdb/title name are derived.
-    /// The build+deploy still run through Rxdk.Cli against the project directory.
+    /// rxdk.project.json: an ApplicationType=RXDK project is identified by Keyword=RXDK, and its
+    /// output/name/kind come from the evaluated $(OutDir)/$(TargetName)/$(ConfigurationType)
+    /// (see GetProjectFacts). Build runs through VS/MSBuild; deploy runs through Rxdk.Cli with
+    /// --no-manifest and the Xbox Deployment property-page values.
     /// </summary>
     internal static class XboxDebugLauncher
     {
@@ -28,9 +29,9 @@ namespace RxdkVs.Package.Services
         internal sealed class StartupInfo
         {
             public string ProjectDir;     // dir of the .vcxproj (Rxdk.Cli --project-root)
-            public string XbeOutput;      // NMakeOutput (…\out\<name>.xbe)
+            public string XbeOutput;      // evaluated $(OutDir)$(TargetName)$(TargetExt)
             public string ConfigName;     // "Debug" / "Release"
-            public bool IsXbox;           // RxdkXbox == true
+            public bool IsXbox;           // Keyword/ApplicationType=RXDK (RxdkXbox as fallback)
             public EnvDTE.Project Project; // for building via VS (generates the manifest)
             public string SolutionConfig; // active solution config name, e.g. "Debug"
         }
@@ -45,11 +46,11 @@ namespace RxdkVs.Package.Services
         /// <summary>Lightweight facts about the Solution-Explorer-selected project (for context menus).</summary>
         internal struct SelectedProject
         {
-            public bool IsXbox;      // RxdkXbox == true
-            public bool IsDxt;       // NMakeOutput ends with .dxt
+            public bool IsXbox;      // Keyword/ApplicationType=RXDK (RxdkXbox as fallback)
+            public bool IsDxt;       // ConfigurationType == DebuggerExtension
             public string Dir;       // project directory
-            public string Name;      // output base name (from NMakeOutput)
-            public string XbeOutput; // NMakeOutput
+            public string Name;      // $(TargetName)
+            public string XbeOutput; // evaluated $(OutDir)$(TargetName)$(TargetExt)
             public string SolutionConfig;
             public EnvDTE.Project Project;
         }
@@ -79,17 +80,9 @@ namespace RxdkVs.Package.Services
                 try { dir = Path.GetDirectoryName(proj.FullName); }
                 catch { return false; }
 
-                var fullConfig = "Debug|Xbox";
-                try
-                {
-                    var cfg = proj.ConfigurationManager?.ActiveConfiguration;
-                    if (cfg != null) fullConfig = $"{cfg.ConfigurationName}|{cfg.PlatformName}";
-                }
-                catch { /* keep default */ }
-
-                var bps = hier as IVsBuildPropertyStorage;
-                var isXbox = string.Equals(ReadProp(bps, "RxdkXbox", fullConfig), "true", StringComparison.OrdinalIgnoreCase);
-                var outp = ReadProp(bps, "NMakeOutput", fullConfig) ?? string.Empty;
+                // Evaluated from the VC project model (ApplicationType=RXDK sets no RxdkXbox/NMakeOutput).
+                var facts = GetProjectFacts(proj);
+                if (facts == null) return false;
 
                 var solutionConfig = "Debug";
                 try { solutionConfig = ((EnvDTE.DTE)proj.DTE).Solution.SolutionBuild.ActiveConfiguration.Name; }
@@ -97,11 +90,11 @@ namespace RxdkVs.Package.Services
 
                 sel = new SelectedProject
                 {
-                    IsXbox = isXbox,
-                    IsDxt = outp.EndsWith(".dxt", StringComparison.OrdinalIgnoreCase),
+                    IsXbox = facts.IsXbox,
+                    IsDxt = facts.IsDxt,
                     Dir = dir,
-                    Name = Path.GetFileNameWithoutExtension(outp),
-                    XbeOutput = outp,
+                    Name = facts.TargetName ?? Path.GetFileNameWithoutExtension(dir),
+                    XbeOutput = facts.TargetPath ?? string.Empty,
                     SolutionConfig = solutionConfig,
                     Project = proj,
                 };
@@ -129,7 +122,7 @@ namespace RxdkVs.Package.Services
             }
             if (string.IsNullOrEmpty(sel.XbeOutput))
             {
-                await ShowAsync(package, "Could not determine the project's output (NMakeOutput). Build once, then Deploy.");
+                await ShowAsync(package, "Could not determine the project's output. Build once, then Deploy.");
                 return;
             }
 
@@ -138,16 +131,22 @@ namespace RxdkVs.Package.Services
                 ProjectDir = sel.Dir, XbeOutput = sel.XbeOutput, IsXbox = true,
                 Project = sel.Project, SolutionConfig = sel.SolutionConfig,
             };
-            // Incremental build via VS first (regenerates the manifest + ensures output is current),
-            // then deploy — so this both retries a failed deploy and picks up any source changes.
+            // Incremental build via VS first (ensures the output is current), then deploy -- so this
+            // both retries a failed deploy and picks up any source changes.
             if (!await BuildViaVsAsync(package, info))
             {
                 await ShowAsync(package, "Build failed — see the Output / Error List.");
                 return;
             }
-            // Deploy reads the committed rxdk.project.json (generated from the .vcxproj by the build)
-            // and selects the built configuration's per-config outputDir.
-            if (await cli.RunAsync(new[] { "deploy", "--project-root", info.ProjectDir, "--configuration", info.SolutionConfig }, info.ProjectDir) != 0)
+            // Deploy is driven entirely from the .vcxproj (--no-manifest): the evaluated output dir +
+            // the Xbox Deployment property-page values, never rxdk.project.json.
+            var deployFacts = GetProjectFacts(info.Project);
+            if (deployFacts == null)
+            {
+                await ShowAsync(package, "Could not read the project's deployment properties.");
+                return;
+            }
+            if (await cli.RunAsync(BuildDeployArgs(deployFacts, info.SolutionConfig), info.ProjectDir) != 0)
             {
                 await ShowAsync(package, "Deploy failed — is the devkit on and reachable? Fix it and run Deploy to Xbox again.");
                 return;
@@ -177,7 +176,7 @@ namespace RxdkVs.Package.Services
             }
             if (string.IsNullOrEmpty(info.XbeOutput))
             {
-                await ShowAsync(package, "Could not determine the project's output (NMakeOutput). Build the project once, then try again.");
+                await ShowAsync(package, "Could not determine the project's output. Build the project once, then try again.");
                 return;
             }
 
@@ -188,15 +187,20 @@ namespace RxdkVs.Package.Services
                 return;
             }
 
-            // Build through VS/MSBuild (not Rxdk.Cli directly): that runs the platform's
-            // RxdkGenerateProjectJson target, which writes the committed rxdk.project.json from the
-            // .vcxproj. Then deploy reads that and selects the built configuration.
+            // Build through VS/MSBuild (not Rxdk.Cli directly) so the VC project system builds the
+            // .xbe/.iso the way the IDE would, then deploy from the .vcxproj (--no-manifest).
             if (!await BuildViaVsAsync(package, info))
             {
                 await ShowAsync(package, "Build failed — see the Output / Error List.");
                 return;
             }
-            if (await cli.RunAsync(new[] { "deploy", "--project-root", info.ProjectDir, "--configuration", info.SolutionConfig }, info.ProjectDir) != 0)
+            var launchFacts = GetProjectFacts(info.Project);
+            if (launchFacts == null)
+            {
+                await ShowAsync(package, "Could not read the project's deployment properties.");
+                return;
+            }
+            if (await cli.RunAsync(BuildDeployArgs(launchFacts, info.SolutionConfig), info.ProjectDir) != 0)
             {
                 await ShowAsync(package, "Deploy failed — is the devkit on and reachable?");
                 return;
@@ -297,21 +301,18 @@ namespace RxdkVs.Package.Services
             catch { return null; }
 
             var configName = "Debug";
-            string fullConfig = "Debug|Xbox";
             try
             {
                 var cfg = proj.ConfigurationManager?.ActiveConfiguration;
-                if (cfg != null)
-                {
-                    configName = cfg.ConfigurationName;
-                    fullConfig = $"{cfg.ConfigurationName}|{cfg.PlatformName}";
-                }
+                if (cfg != null) configName = cfg.ConfigurationName;
             }
             catch { /* keep defaults */ }
 
-            var bps = hier as IVsBuildPropertyStorage;
-            var isXbox = string.Equals(ReadProp(bps, "RxdkXbox", fullConfig), "true", StringComparison.OrdinalIgnoreCase);
-            var xbe = ReadProp(bps, "NMakeOutput", fullConfig);
+            // Evaluated from the VC project model (ApplicationType=RXDK sets no RxdkXbox/NMakeOutput).
+            var facts = GetProjectFacts(proj);
+            if (facts == null) return null;
+            var isXbox = facts.IsXbox;
+            var xbe = facts.TargetPath;
 
             string solutionConfig = configName;
             try { solutionConfig = ((EnvDTE.DTE)proj.DTE).Solution.SolutionBuild.ActiveConfiguration.Name; }
@@ -335,6 +336,126 @@ namespace RxdkVs.Package.Services
             }
             catch { /* property absent */ }
             return null;
+        }
+
+        // ---- New-toolset (ApplicationType=RXDK) project facts ----
+        //
+        // The retired Makefile mechanism marked a project with RxdkXbox=true and exposed its output
+        // via NMakeOutput, both of which IVsBuildPropertyStorage could read as persisted strings. The
+        // ApplicationType=RXDK toolset sets NEITHER: a project is marked Keyword=RXDK and its output
+        // is $(OutDir)$(TargetName)$(TargetExt), which are toolset defaults (not persisted), so they
+        // only resolve by EVALUATING them in the config's context. That is what the VC project model's
+        // VCConfiguration.Evaluate does; we reach it late-bound (dynamic) to avoid a hard
+        // Microsoft.VisualStudio.VCProjectEngine reference.
+
+        internal sealed class ProjectFacts
+        {
+            public bool IsXbox;
+            public bool IsDxt;
+            public string ProjectDir;
+            public string TargetName;      // $(TargetName)
+            public string TargetPath;      // absolute $(OutDir)$(TargetName)$(TargetExt) (.xbe/.dxt/.lib)
+            public string OutDir;          // absolute evaluated $(OutDir)
+            public string RemotePath;      // $(RxdkRemotePath) (may be empty -> CLI convention)
+            public bool? ForceCopy;        // $(RxdkForceCopy)
+            public string DeployPaths;     // $(RxdkDeployPaths), ';'-separated (may be empty)
+        }
+
+        // The VCConfiguration (dynamic) for a project's config, e.g. "Debug|Xbox".
+        private static dynamic GetVcConfig(EnvDTE.Project proj, string fullConfig)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            try
+            {
+                dynamic vcProj = proj?.Object; // VCProject
+                if (vcProj == null) return null;
+                foreach (dynamic cfg in vcProj.Configurations)
+                    if (string.Equals((string)cfg.Name, fullConfig, StringComparison.OrdinalIgnoreCase))
+                        return cfg;
+                foreach (dynamic cfg in vcProj.Configurations) return cfg; // fallback: first
+            }
+            catch { /* not a VC project / automation unavailable */ }
+            return null;
+        }
+
+        // Evaluate the RXDK-relevant MSBuild properties for the project's active configuration.
+        internal static ProjectFacts GetProjectFacts(EnvDTE.Project proj)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (proj == null) return null;
+            string projectDir;
+            try { projectDir = Path.GetDirectoryName(proj.FullName); }
+            catch { return null; }
+
+            string configName = "Debug", platform = "Xbox";
+            try
+            {
+                var active = proj.ConfigurationManager?.ActiveConfiguration;
+                if (active != null) { configName = active.ConfigurationName; platform = active.PlatformName; }
+            }
+            catch { /* keep defaults */ }
+
+            dynamic vc = GetVcConfig(proj, $"{configName}|{platform}");
+            string Eval(string expr)
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+                try { return vc?.Evaluate(expr) as string; } catch { return null; }
+            }
+
+            const StringComparison OIC = StringComparison.OrdinalIgnoreCase;
+            // Xbox project: the new toolset marks it Keyword=RXDK / ApplicationType=RXDK; keep the old
+            // RxdkXbox marker as a fallback for a project still on the retired mechanism.
+            var isXbox = string.Equals(Eval("$(Keyword)"), "RXDK", OIC)
+                || string.Equals(Eval("$(ApplicationType)"), "RXDK", OIC)
+                || string.Equals(Eval("$(RxdkXbox)"), "true", OIC);
+            var isDxt = string.Equals(Eval("$(ConfigurationType)"), "DebuggerExtension", OIC);
+
+            var outDir = Eval("$(OutDir)") ?? string.Empty;
+            var targetName = Eval("$(TargetName)");
+            var targetExt = Eval("$(TargetExt)"); // .xbe / .dxt / .lib
+            string absOutDir = null, targetPath = null;
+            if (!string.IsNullOrEmpty(outDir))
+                absOutDir = Path.GetFullPath(Path.IsPathRooted(outDir) ? outDir : Path.Combine(projectDir, outDir));
+            if (absOutDir != null && !string.IsNullOrEmpty(targetName))
+                targetPath = Path.Combine(absOutDir, targetName + (targetExt ?? string.Empty));
+
+            var forceCopyRaw = Eval("$(RxdkForceCopy)");
+            bool? forceCopy = string.IsNullOrEmpty(forceCopyRaw) ? (bool?)null : string.Equals(forceCopyRaw, "true", OIC);
+
+            return new ProjectFacts
+            {
+                IsXbox = isXbox,
+                IsDxt = isDxt,
+                ProjectDir = projectDir,
+                TargetName = targetName,
+                TargetPath = targetPath,
+                OutDir = absOutDir,
+                RemotePath = Eval("$(RxdkRemotePath)"),
+                ForceCopy = forceCopy,
+                DeployPaths = Eval("$(RxdkDeployPaths)"),
+            };
+        }
+
+        // The Rxdk.Cli 'deploy' argument list for a .vcxproj project: always --no-manifest (VS20XX is
+        // .vcxproj-driven and must never read rxdk.project.json), plus the evaluated output dir, name,
+        // and the Xbox Deployment page values. Empty properties are omitted so the CLI applies its
+        // own defaults (e.g. the xe:\<name> remote-path convention).
+        private static string[] BuildDeployArgs(ProjectFacts f, string solutionConfig)
+        {
+            var args = new List<string>
+            {
+                "deploy",
+                "--project-root", f.ProjectDir,
+                "--configuration", solutionConfig,
+                "--no-manifest",
+            };
+            if (!string.IsNullOrEmpty(f.OutDir)) { args.Add("--local-dir"); args.Add(f.OutDir); }
+            if (!string.IsNullOrEmpty(f.TargetName)) { args.Add("--name"); args.Add(f.TargetName); }
+            if (f.IsDxt) args.Add("--dxt");
+            if (!string.IsNullOrWhiteSpace(f.RemotePath)) { args.Add("--remote-dir"); args.Add(f.RemotePath); }
+            if (f.ForceCopy == true) { args.Add("--force-copy"); args.Add("true"); }
+            if (!string.IsNullOrWhiteSpace(f.DeployPaths)) { args.Add("--deploy-paths"); args.Add(f.DeployPaths); }
+            return args.ToArray();
         }
 
         private static object GetExtObject(IVsHierarchy hier)

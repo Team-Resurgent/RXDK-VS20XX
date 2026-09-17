@@ -77,18 +77,26 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "samples"; Description: "Install the RXDK sample suite (large download)"; GroupDescription: "Optional components:"
 
 [Files]
-; The RXDK engine (Rxdk.Cli/Rxdk.Dap + net8 closure) -> the location the extension resolves.
-Source: "{#PayloadDir}\engine\*"; DestDir: "{commonappdata}\RXDK\engine"; Flags: ignoreversion recursesubdirs createallsubdirs
+; The RXDK engine (Rxdk.Cli/Rxdk.Dap + net8 closure) -> the chosen RXDK root (default
+; %ProgramData%\RXDK), the location the extension/toolset resolve via the registry key below.
+Source: "{#PayloadDir}\engine\*"; DestDir: "{code:RxdkRoot}\engine"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; The custom Xbox MSBuild platform, staged here and copied into each VS install in code.
 Source: "{#PayloadDir}\platform\*"; DestDir: "{app}\platform"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; The extension VSIX, installed via VSIXInstaller in [Run].
 Source: "{#PayloadDir}\{#VsixFileName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
-; No [Registry] env-var writes: the RXDK build toolset (Rxdk.MsBuild) and engine both default to
-; the standard install locations ({commonappdata}\RXDK for the SDK/tools, {localappdata}\RXDK\zig
-; for the pinned Zig) when RXDK / RXDK_ZIG are unset, so this installer no longer needs to pollute
-; the machine/user environment. The env vars remain honored as an override for non-standard installs.
+; No env-var writes (the RXDK / RXDK_ZIG env vars stay honored only as an override for non-standard
+; installs). Instead the chosen RXDK root is recorded in the registry so the build toolset
+; (Rxdk.MsBuild.props $(Registry:) + RxdkToolTask) and the engine (RxdkPaths) find a custom location
+; without an env var. A plain-VSIX / VS Code install writes no key and both fall back to
+; %ProgramData%\RXDK. Written to BOTH views on purpose: MSBuild's $(Registry:) intrinsic and 32-bit
+; readers resolve through WOW6432Node, so a 64-bit-only write would be invisible to the toolset.
+[Registry]
+Root: HKLM32; Subkey: "SOFTWARE\TeamResurgent\RXDK"; ValueType: string; ValueName: "InstallPath"; ValueData: "{code:RxdkRoot}"; Flags: uninsdeletekey
+Root: HKLM64; Subkey: "SOFTWARE\TeamResurgent\RXDK"; ValueType: string; ValueName: "InstallPath"; ValueData: "{code:RxdkRoot}"; Flags: uninsdeletekey
+Root: HKLM32; Subkey: "SOFTWARE\TeamResurgent\RXDK"; ValueType: string; ValueName: "Version"; ValueData: "{#MyAppVersion}"
+Root: HKLM64; Subkey: "SOFTWARE\TeamResurgent\RXDK"; ValueType: string; ValueName: "Version"; ValueData: "{#MyAppVersion}"
 
 [Run]
 Filename: "{code:GetVsixInstaller}"; Parameters: """{app}\{#VsixFileName}"" /quiet"; StatusMsg: "Installing the RXDK extension into Visual Studio..."; Flags: waituntilterminated runhidden; Check: HasVsixInstaller
@@ -98,6 +106,8 @@ var
   DotNetDownloadPage: TDownloadWizardPage;
   ProgressPage: TOutputProgressWizardPage;
   VsixInstallerPath: String;
+  RxdkDirPage: TInputDirWizardPage;
+  UninstallRxdkRoot: String;
 
 const
   ProgramDataRxdk = '{commonappdata}\RXDK';
@@ -107,6 +117,24 @@ const
 function GetVsixInstaller(Param: String): String;
 begin
   Result := VsixInstallerPath;
+end;
+
+{ The chosen RXDK root (SDK/tools/engine). During install this is the directory page value;
+  during uninstall (no wizard) it is read back from the registry the install wrote; otherwise the
+  %ProgramData%\RXDK default. Referenced by [Files] and [Registry] via the code: prefix, and by the
+  engine/uninstall code, so all of them agree on one location. }
+function RxdkRoot(Param: String): String;
+var reg: String;
+begin
+  if Assigned(RxdkDirPage) and (Trim(RxdkDirPage.Values[0]) <> '') then
+    Result := Trim(RxdkDirPage.Values[0])
+  else if RegQueryStringValue(HKLM, 'SOFTWARE\TeamResurgent\RXDK', 'InstallPath', reg) and (Trim(reg) <> '') then
+    Result := Trim(reg)
+  else
+    Result := ExpandConstant(ProgramDataRxdk);
+  { strip a trailing backslash so the root plus a subfolder never doubles it }
+  if (Length(Result) > 3) and (Copy(Result, Length(Result), 1) = '\') then
+    Result := Copy(Result, 1, Length(Result) - 1);
 end;
 
 function HasVsixInstaller: Boolean;
@@ -309,7 +337,7 @@ end;
 
 function EngineCli: String;
 begin
-  Result := ExpandConstant(ProgramDataRxdk + '\engine\Rxdk.Cli.exe');
+  Result := RxdkRoot('') + '\engine\Rxdk.Cli.exe';
 end;
 
 procedure RunEngineVerb(const Verb: String);
@@ -380,6 +408,17 @@ begin
   DotNetDownloadPage.ShowBaseNameInsteadOfUrl := True;
   ProgressPage := CreateOutputProgressPage('Setting up RXDK', 'Installing prerequisites and the Visual Studio extension...');
   VsixInstallerPath := FindVsixInstaller;
+  { Let the user choose where the RXDK SDK / host tools / engine go. The default is the machine-wide
+    %ProgramData%\RXDK; the choice is recorded in the registry (see [Registry]) so the build toolset
+    and engine resolve it. Its .Values[0] is read by RxdkRoot and thus [Files]/[Registry]. }
+  RxdkDirPage := CreateInputDirPage(wpSelectDir,
+    'RXDK install location',
+    'Where should the RXDK SDK, host tools and build engine be installed?',
+    'Setup will install the RXDK SDK, host tools and build engine into the following folder, and record it in the registry so Visual Studio and the engine can find it.'#13#10#13#10 +
+    'To continue, click Next. To choose a different folder, click Browse.',
+    False, '');
+  RxdkDirPage.Add('');
+  RxdkDirPage.Values[0] := ExpandConstant(ProgramDataRxdk);
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -406,6 +445,17 @@ end;
 
 { ---------- uninstall ---------- }
 
+function InitializeUninstall(): Boolean;
+begin
+  { Capture the install root from the registry before its key is removed (uninsdeletekey), so the
+    post-uninstall cleanup deletes the right folder even for a custom (non-ProgramData) install. }
+  if not RegQueryStringValue(HKLM, 'SOFTWARE\TeamResurgent\RXDK', 'InstallPath', UninstallRxdkRoot)
+     or (Trim(UninstallRxdkRoot) = '') then
+    UninstallRxdkRoot := ExpandConstant('{commonappdata}\RXDK');
+  UninstallRxdkRoot := Trim(UninstallRxdkRoot);
+  Result := True;
+end;
+
 procedure RemoveXboxPlatform;
 var
   Dests: TArrayOfString;
@@ -430,8 +480,9 @@ begin
   end
   else if CurUninstallStep = usPostUninstall then
   begin
-    { Remove the machine-wide RXDK data the installer populated. }
-    if DirExists(ExpandConstant(ProgramDataRxdk)) then
-      DelTree(ExpandConstant(ProgramDataRxdk), True, True, True);
+    { Remove the RXDK data the installer populated (registry-recorded root, captured in
+      InitializeUninstall so a custom install location is cleaned up too). }
+    if (UninstallRxdkRoot <> '') and DirExists(UninstallRxdkRoot) then
+      DelTree(UninstallRxdkRoot, True, True, True);
   end;
 end;

@@ -67,7 +67,6 @@ PrivilegesRequired=admin
 ArchitecturesAllowed=x64os
 ArchitecturesInstallIn64BitMode=x64os
 MinVersion=10.0
-ChangesEnvironment=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -86,11 +85,10 @@ Source: "{#PayloadDir}\platform\*"; DestDir: "{app}\platform"; Flags: ignorevers
 Source: "{#PayloadDir}\{#VsixFileName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
-[Registry]
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: string; ValueName: "RXDK"; \
-    ValueData: "{commonappdata}\RXDK"; Flags: preservestringtype
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "RXDK_ZIG"; \
-    ValueData: "{localappdata}\RXDK\zig\0.16.0\zig-x86_64-windows-0.16.0\zig.exe"; Flags: preservestringtype
+; No [Registry] env-var writes: the RXDK build toolset (Rxdk.MsBuild) and engine both default to
+; the standard install locations ({commonappdata}\RXDK for the SDK/tools, {localappdata}\RXDK\zig
+; for the pinned Zig) when RXDK / RXDK_ZIG are unset, so this installer no longer needs to pollute
+; the machine/user environment. The env vars remain honored as an override for non-standard installs.
 
 [Run]
 Filename: "{code:GetVsixInstaller}"; Parameters: """{app}\{#VsixFileName}"" /quiet"; StatusMsg: "Installing the RXDK extension into Visual Studio..."; Flags: waituntilterminated runhidden; Check: HasVsixInstaller

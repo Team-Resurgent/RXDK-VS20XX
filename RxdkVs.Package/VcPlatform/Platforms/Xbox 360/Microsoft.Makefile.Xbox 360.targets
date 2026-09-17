@@ -1,0 +1,33 @@
+<!--
+***********************************************************************************************
+Microsoft.Makefile.Xbox 360.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- *******************************************************************************************
+        Build settings for Xbox 360 Makefile project
+       ******************************************************************************************* -->
+
+  <Target Name="MakefileBuild" DependsOnTargets="PrepareForNMakeBuild;ResolveReferences;GetTargetPath" Returns="$(NMakeManagedOutput)">
+    <Exec Command="$(NMakeBuildCommandLine)" Condition="'$(NMakeBuildCommandLine)'!=''"/>
+    <Exec Command="echo There is no build command line to execute." Condition="'$(NMakeBuildCommandLine)'==''"/>
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="MakefileBuild;DeployToHardDrive" Condition="'$(ConfigurationType)' == 'Makefile'" />
+
+  <Target Name="MakefileRebuild" DependsOnTargets="PrepareForNMakeBuild;Clean;ResolveReferences;GetTargetPath" Returns="$(NMakeManagedOutput)">
+    <Exec Command="$(NMakeReBuildCommandLine)" Condition="'$(NMakeReBuildCommandLine)'!=''"/>
+    <Exec Command="echo There is no build command line to execute." Condition="'$(NMakeReBuildCommandLine)'==''"/>
+  </Target>
+
+  <Target Name="Rebuild" DependsOnTargets="MakefileRebuild;DeploytoHardDrive" Condition="'$(ConfigurationType)' == 'Makefile'" />
+
+</Project>

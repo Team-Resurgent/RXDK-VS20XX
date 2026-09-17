@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Rule
+    xmlns="http://schemas.microsoft.com/build/2009/properties"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+
+    Name="ImageXex"
+    DisplayName="Xbox 360 Image Conversion"
+    PageTemplate="tool"
+    SwitchPrefix="/"
+    Order="25">
+
+    <Rule.Categories>
+
+        <Category
+            Name="General"
+            DisplayName="General"/>
+
+        <Category
+            Name="Privileges"
+            DisplayName="Privileges"/>
+
+        <Category
+            Name="Command Line"
+            Subtype="CommandLine"
+            DisplayName="Command Line"/>
+
+    </Rule.Categories>
+  
+  <Rule.DataSource>
+    <DataSource
+        Persistence="ProjectFile"
+        ItemType="ImageXex"
+        HasConfigurationCondition="true"/>
+  </Rule.DataSource>
+
+  <StringProperty
+      Name="ConfigurationFile"
+      Subtype="file"
+      Category="General"
+      DisplayName="Configuration File"
+      Description="Specify an XML file that overrides the project XEX configuration settings."
+      F1Keyword="VC.Project.VCX360ImageTool.ConfigurationFile"      
+      Switch="config:"/>
+
+  <StringProperty
+      Name="ImageXexOutput"
+      Subtype="file"
+      Category="General"
+      DisplayName="Output File"
+      Description="Override the default output filename."
+      Switch="out:"
+      F1Keyword="VC.Project.VCX360ImageTool.OutputFileName">
+      <StringProperty.DataSource>
+          <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+      </StringProperty.DataSource>
+  </StringProperty>
+
+  <StringProperty
+      Name="TitleID"
+      Category="General"
+      DisplayName="Title ID"
+      Description="Specifies the title ID of the application."
+      Switch="titleid:"
+      F1Keyword="VC.Project.VCX360ImageTool.TitleID"/>
+
+  <StringProperty
+      Name="LanKey"
+      Category="General"
+      DisplayName="LAN Key"
+      Description="Specifies the key used for system link. (For testing purposes only.  Final LAN Key is set at submission time.)"
+      Switch="lankey:"
+      F1Keyword="VC.Project.VCX360ImageTool.LanKey"/>
+
+  <BoolProperty
+      Name="SuppressStartupBanner"
+      Category="General"
+      DisplayName="Suppress Startup Banner"
+      Description="Suppress the display of the startup banner and information messages.     (/nologo)"
+      Switch="nologo"
+      F1Keyword="VC.Project.VCX360ImageTool.SuppressStartupBanner"/>
+                
+  <StringProperty
+      Name="BaseAddress"
+      Category="General"
+      DisplayName="Base Address"
+      Description="Specifies the base address of the image when loaded."
+      Switch="baseaddr:"
+      F1Keyword="VC.Project.VCX360ImageTool.BaseAddress"/>
+
+  <StringProperty
+      Name="HeapSize"
+      Category="General"
+      DisplayName="Heap Size"
+      Description="Specifies the size of the default process heap created at process startup."
+      Switch="xapiheap:"
+      F1Keyword="VC.Project.VCX360ImageTool.XapiHeapSize"/>
+
+  <StringProperty
+      Name="WorkspaceSize"
+      Category="General"
+      DisplayName="Workspace Size"
+      Description="Specifies the size of the memory workspace for enumerators and other system processes."
+      Switch="workspace:"
+      F1Keyword="VC.Project.VCX360ImageTool.WorkspaceSize"/>
+
+  <StringListProperty
+      Name="AdditionalSections"
+      Category="General"
+      DisplayName="Additional Sections"
+      Description="Adds binary resource files to the produced XEX image with section headers."
+      Switch="section:"
+      F1Keyword="VC.Project.VCX360ImageTool.AdditionalSections">
+      <StringListProperty.ValueEditors>
+          <ValueEditor EditorType="XboxAdditionalSectionsPropertyEditor" DisplayName="&lt;Edit...&gt;"/>
+      </StringListProperty.ValueEditors>
+  </StringListProperty>
+
+  <BoolProperty
+      Name="ExportByName"
+      Category="General"
+      DisplayName="Export By Name"
+      Description="Specifies whether symbol names are to be included in the executable."
+      Switch="exportnames"
+      F1Keyword="VC.Project.VCX360ImageTool.ExportByName"/>
+
+  <BoolProperty
+      Name="OpticalDiscDriveMapping"
+      Category="Privileges"
+      DisplayName="Optical Disc Drive Mapping"
+      Description="Does not map the optical disc drive to CdRom0:\\."
+      Switch="privilege:2"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="Pal50Incompatible"
+      Category="Privileges"
+      DisplayName="PAL50 Incompatible"
+      Description="Specifies that the title does not support PAL50."
+      Switch="privilege:10"
+      F1Keyword="VC.Project.VCX360ImageTool.PrivilegePAL50Incompatible"/>
+
+  <BoolProperty
+      Name="MultiDiscTitle"
+      Category="Privileges"
+      DisplayName="Multi-disc Title"
+      Description="Enables system support for a multi-disc title."
+      Switch="privilege:15 /privilege:16"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="PreferBigButtonInput"
+      Category="Privileges"
+      DisplayName="Prefer Big Button Input"
+      Description="Modifies system notifications for game controller removal."
+      Switch="privilege:25"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="CrossPlatformSystemLink"
+      Category="Privileges"
+      DisplayName="Cross Platform System Link"
+      Description="Indicates the title will use IP addressing for System Link instead of Ethernet addressing."
+      Switch="privilege:14"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="AllowAvatarGetMetadata"
+      Category="Privileges"
+      DisplayName="Allow Avatar Get Metadata By XUID"
+      Description="Indicates the title is allowed to call XAvatarGetMetadataByXuid in order to get a collection of LIVE user's XAVATAR_METADATA blobs."
+      Switch="privilege:29"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="AllowControllerSwapping"
+      Category="Privileges"
+      DisplayName="Allow Controller Swapping"
+      Description="Allows a title to swap the users from one controller to another with XInputRemap."
+      Switch="privilege:30"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="RequireFullExperience"
+      Category="Privileges"
+      DisplayName="Require Full Experience"
+      Description="Indicates the title requires the extended Xbox LIVE experience (as launched in the Fall 2008 NXE)."
+      Switch="privilege:34"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+  <BoolProperty
+      Name="GameVoiceRequiredUI"
+      Category="Privileges"
+      DisplayName="Game Voice Required UI"
+      Description="Allows the title to call XShowRequiredGameVoiceChannelUI, which informs the user the title requires them to switch to the game voice channel."
+      Switch="privilege:35"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+  
+   <BoolProperty
+      Name="KinectElevationControl"
+      Category="Privileges"
+      DisplayName="Kinect Elevation Control"
+      Description="Allows a title to successfully call NuiCameraElevationSetAngle."
+      Switch="privilege:37"
+      F1Keyword="VC.Project.VCX360ImageTool.Privileges"/>
+
+   <EnumProperty Name="KinectSupportLevel" Category="Privileges" F1Keyword="VC.Project.VCX360ImageTool.PrivilegeSkeletalTrackingRequirement">
+    <EnumProperty.DisplayName>
+      <sys:String>Skeletal Tracking Requirement</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>This property indicates whether the title requires skeletal tracking.</sys:String>
+    </EnumProperty.Description>
+   <EnumValue Name="None" Switch="">
+      <EnumValue.DisplayName>
+        <sys:String>None</sys:String>
+      </EnumValue.DisplayName>
+    </EnumValue>
+    <EnumValue Name="RequiresTracking" Switch="privilege:38">
+      <EnumValue.DisplayName>
+        <sys:String>Requires Tracking</sys:String>
+      </EnumValue.DisplayName>
+    </EnumValue>
+    <EnumValue Name="SupportsTracking" Switch="privilege:39">
+      <EnumValue.DisplayName>
+        <sys:String>Supports Tracking</sys:String>
+      </EnumValue.DisplayName>
+    </EnumValue>
+  </EnumProperty>
+
+  <StringProperty
+      Name="AdditionalOptions"
+      Category="Command Line"
+      DisplayName="Additional Options"
+      Description="Additional Options"/>
+
+</Rule>

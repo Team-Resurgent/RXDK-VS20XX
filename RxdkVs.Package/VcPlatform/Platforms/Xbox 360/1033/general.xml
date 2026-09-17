@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Rule Name="ConfigurationGeneral" PageTemplate="generic" xmlns="http://schemas.microsoft.com/build/2009/properties" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <Rule.DisplayName>
+    <sys:String>General</sys:String>
+  </Rule.DisplayName>
+  <Rule.Description>
+    <sys:String>General</sys:String>
+  </Rule.Description>
+  <Rule.Categories>
+    <Category Name="General">
+      <Category.DisplayName>
+        <sys:String>General</sys:String>
+      </Category.DisplayName>
+      <Category.Description>
+        <sys:String>General</sys:String>
+      </Category.Description>
+    </Category>
+    <Category Name="ProjectDefaults">
+      <Category.DisplayName>
+        <sys:String>Project Defaults</sys:String>
+      </Category.DisplayName>
+      <Category.Description>
+        <sys:String>Project Defaults</sys:String>
+      </Category.Description>
+    </Category>
+  </Rule.Categories>
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" Label="Configuration">
+    </DataSource>
+  </Rule.DataSource>
+  <StringProperty Name="RxdkToolchain" Category="General" ReadOnly="true" F1Keyword="VC.Project.VCConfiguration.RxdkToolchain">
+    <StringProperty.DisplayName>
+      <sys:String>RXDK-360 Toolchain</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The RXDK-360 build toolchain this configuration uses - Modern (clang/LLVM) or Legacy (stock XDK) - determined by the Platform Toolset. Read-only.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="false" />
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="OutDir" Category="General" Default="$(ProjectDir)$(Configuration)\" Subtype="folder" F1Keyword="VC.Project.VCConfiguration.OutputDirectory">
+    <StringProperty.DisplayName>
+      <sys:String>Output Directory</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a relative path to the output file directory; can include environment variables.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="IntDir" Category="General" Default="$(Configuration)\" Subtype="folder" F1Keyword="VC.Project.VCConfiguration.IntermediateDirectory">
+    <StringProperty.DisplayName>
+      <sys:String>Intermediate Directory</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a relative path to the intermediate file directory; can include environment variables.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="TargetName" Category="General" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Target Name</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a file name that this project will generate.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="TargetExt" Category="General" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Target Extension</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a file extension that this project will generate. (Example: .exe or .dll)</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringListProperty Name="ExtensionsToDeleteOnClean" Category="General" Separator=";" F1Keyword="VC.Project.VCConfiguration.DeleteExtensionsOnClean">
+    <StringListProperty.DisplayName>
+      <sys:String>Extensions to Delete on Clean</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Semi-colon delimited wildcard specification for which files in the intermediate directory to delete on clean or rebuild.</sys:String>
+    </StringListProperty.Description>
+    <StringListProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringListProperty.DataSource>
+  </StringListProperty>
+  <StringProperty Name="BuildLogFile" Category="General" Default="$(IntDir)BuildLog.txt" Subtype="file" F1Keyword="VC.Project.VCConfiguration.BuildLogFile">
+    <StringProperty.DisplayName>
+      <sys:String>Build Log File</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies the build log file to write to when build logging is enabled.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <DynamicEnumProperty Name="PlatformToolset" Category="General" EnumProvider="Toolsets" F1Keyword="VC.Project.VCConfiguration.PlatformToolset">
+    <DynamicEnumProperty.DisplayName>
+      <sys:String>Platform Toolset</sys:String>
+    </DynamicEnumProperty.DisplayName>
+    <DynamicEnumProperty.Description>
+      <sys:String>Specifies the toolset used for building the current configuration; If not set, the default toolset is used</sys:String>
+    </DynamicEnumProperty.Description>
+  </DynamicEnumProperty>
+  <BoolProperty Name="EnableManagedIncrementalBuild" Category="General" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Enable Managed Incremental Build</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Instructs the project system to analyze referenced assemblies for changes before triggering a rebuild of the managed project.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <EnumProperty Name="ConfigurationType" Category="ProjectDefaults" F1Keyword="VC.Project.VCConfiguration.ConfigurationType">
+    <EnumProperty.DisplayName>
+      <sys:String>Configuration Type</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Specifies the type of output this configuration generates.</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="Makefile">
+      <EnumValue.DisplayName>
+        <sys:String>Makefile</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Makefile</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="Application">
+      <EnumValue.DisplayName>
+        <sys:String>Title (.xex)</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Title (.xex)</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="DynamicLibrary">
+      <EnumValue.DisplayName>
+        <sys:String>Dynamic Library (.xex)</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Dynamic Library (.xex)</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="StaticLibrary">
+      <EnumValue.DisplayName>
+        <sys:String>Static library (.lib)</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Static Library (.lib)</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="Utility">
+      <EnumValue.DisplayName>
+        <sys:String>Utility</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Utility</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <EnumProperty Name="UseOfMfc" DisplayName="Use of MFC"
+                Description="Specifies how MFC is used by the configuration."
+                Category="ProjectDefaults"
+                F1Keyword="VC.Project.VCConfiguration.useOfMfc"
+                Visible="false">
+    <EnumValue Name="false" DisplayName="Use Standard Windows Libraries" Description="Use Standard Windows Libraries" />
+    <EnumValue Name="Static" DisplayName="Use MFC in a Static Library" Description="Use MFC in a Static Library" />
+    <EnumValue Name="Dynamic" DisplayName="Use MFC in a Shared DLL" Description="Use MFC in a Shared DLL" />
+  </EnumProperty>
+  <EnumProperty Name="UseOfAtl" DisplayName="Use of ATL"
+                Description="Specifies how ATL is used by the configuration."
+                Category="ProjectDefaults"
+                F1Keyword="VC.Project.VCConfiguration.useOfATL"
+                Visible="false">
+    <EnumValue Name="false" DisplayName="Not Using ATL" Description="Not Using ATL" />
+    <EnumValue Name="Static" DisplayName="Static Link to ATL" Description="Static Link to ATL" />
+    <EnumValue Name="Dynamic" DisplayName="Dynamic Link toF ATL" Description="Dynamic Link to ATL" />
+  </EnumProperty>
+  <EnumProperty Name="CharacterSet" Category="ProjectDefaults" F1Keyword="VC.Project.VCConfiguration.CharacterSet">
+    <EnumProperty.DisplayName>
+      <sys:String>Character Set</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Tells the compiler to use the specified character set; aids in localization issues.</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="NotSet">
+      <EnumValue.DisplayName>
+        <sys:String>Not Set</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Not Set</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="Unicode">
+      <EnumValue.DisplayName>
+        <sys:String>Use Unicode Character Set</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Use Unicode Character Set</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="MultiByte">
+      <EnumValue.DisplayName>
+        <sys:String>Use Multi-Byte Character Set</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Use Multi-Byte Character Set</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <EnumProperty Name="WholeProgramOptimization" Category="ProjectDefaults" F1Keyword="VC.Project.VCConfiguration.WholeProgramOptimization">
+    <EnumProperty.DisplayName>
+      <sys:String>Whole Program Optimization</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Specifies that the program will be optimized across .obj boundaries; works best if C/C++ optimizations are turned on.</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="false">
+      <EnumValue.DisplayName>
+        <sys:String>No Whole Program Optimization</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>No Whole Program Optimization</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="true">
+      <EnumValue.DisplayName>
+        <sys:String>Use Link Time Code Generation</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Use Link Time Code Generation</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="PGInstrument">
+      <EnumValue.DisplayName>
+        <sys:String>Profile Guided Optimization - Instrument</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Profile Guided Optimization - Instrument</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="PGOptimize">
+      <EnumValue.DisplayName>
+        <sys:String>Profile Guided Optimization - Optimize</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Profile Guided Optimization - Optimize</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="PGUpdate">
+      <EnumValue.DisplayName>
+        <sys:String>Profile Guided Optimization - Update</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Profile Guided Optimization - Update</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <EnumProperty Name="CLRSupport" DisplayName="Common Language Runtime Support"
+                Description="Specifies whether this configuration supports the Common Language Runtime. This is incompatible with some other settings, e.g. runtime checks. See help for /clr family of C++ compiler switches for full list of conflicts."
+                Category="ProjectDefaults"
+                F1Keyword="VC.Project.VCConfiguration.ManagedExtensions"
+                ReadOnly="true"
+                Visible="false">
+    <EnumValue Name="false" DisplayName="No Common Language Runtime Support"
+               Description="No Common Language Runtime Support" />
+    <EnumValue Name="true" DisplayName="Common Language Runtime Support (/clr)"
+               Description="Common Language Runtime Support (/clr)"/>
+    <EnumValue Name="Pure" DisplayName="Pure MSIL Common Language Runtime Support (/clr:pure)"
+               Description="Pure MSIL Common Language Runtime Support (/clr:pure)" />
+    <EnumValue Name="Safe" DisplayName="Safe MSIL Common Language Runtime Support (/clr:safe)"
+               Description="Safe MSIL Common Language Runtime Support (/clr:safe)" />
+    <EnumValue Name="OldSyntax" DisplayName="Common Language Runtime Support, Old Syntax (/clr:oldSyntax)"
+               Description="Common Language Runtime Support, Old Syntax (/clr:oldSyntax)" />
+  </EnumProperty>
+</Rule>

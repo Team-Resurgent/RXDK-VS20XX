@@ -1,0 +1,269 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Rule
+  Name="Xbox360Deploy"
+  DisplayName="Console Deployment"
+  PageTemplate="tool"
+  SwitchPrefix="/"
+  Order="100"
+  xmlns="http://schemas.microsoft.com/build/2009/properties"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+  <Rule.Categories>
+    
+    <Category
+      Name="General"
+      DisplayName="General"/>
+    
+    <Category
+      Name="DeployToHardDrive"
+      DisplayName="Copy To Hard Drive"/>
+    
+    <Category
+      Name="EmulateDvd"
+      DisplayName="Emulate DVD Drive"/>
+
+    <Category
+      Name="Xenia"
+      DisplayName="Xenia Emulator"/>
+
+    <Category
+      Name="Command Line"
+      DisplayName="Command Line"
+      Subtype="CommandLine"/>
+    
+  </Rule.Categories>
+      
+  <Rule.DataSource>
+    <DataSource
+      Persistence="ProjectFile"
+      ItemType="Deploy"
+      HasConfigurationCondition="true"/>
+  </Rule.DataSource>
+
+  <!-- General -->
+
+  <EnumProperty
+    Name="DeploymentType"
+    DisplayName="Deployment Type"
+    Category="General"
+    Default="CopyToHardDrive"
+    Description="Specifies how the title is launched. Copy to Hard Drive deploys to the kit and F5 debugs over XBDM. Emulate DVD Drive uses PC DVD emulation. Xenia Emulator (PC) runs the title in Xenia via the Local Windows Debugger."
+    F1Keyword="VC.Project.VCX360DeploymentTool.DeploymentType">
+    <EnumProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </EnumProperty.DataSource>
+
+    <EnumValue
+      Name="CopyToHardDrive"
+      DisplayName="Copy to Hard Drive"/>
+
+    <EnumValue
+      Name="EmulateDvd"
+      DisplayName="Emulate DVD Drive"/>
+
+    <EnumValue
+      Name="Xenia"
+      DisplayName="Xenia Emulator (PC)"/>
+
+  </EnumProperty>
+
+  <BoolProperty
+    Name="SuppressStartupBanner"
+    DisplayName="Suppress Startup Banner"
+    Category="General"
+    Switch="nologo"
+    Description="Suppress the display of the startup banner and information messages."
+    F1Keyword="VC.Project.VCX360DeploymentTool.SuppressStartupBanner" />
+
+  <BoolProperty
+    Name="ExcludedFromBuild"
+    DisplayName="Excluded From Build"
+    Category="General"
+    Description="Specifies whether the Console Deployment Tool is excluded from the build for the current configuration."
+    F1Keyword="VC.Project.VCX360DeploymentTool.ExcludedFromBuild"/>
+  
+  <!-- DeployToHardDrive -->
+
+  <BoolProperty
+    Name="Progress"
+    DisplayName="Progress"
+    Category="DeployToHardDrive"
+    Switch="PROGRESS"
+    Description="Displays status information about the progress of the deployment.     (/PROGRESS)"
+    F1Keyword="VC.Project.VCX360DeploymentTool.Progress"/>
+
+  <BoolProperty
+    Name="ForceCopy"
+    DisplayName="Force Copy"
+    Category="DeployToHardDrive"
+    Switch="FORCECOPY"
+    Description="Forces the deployment tool to always copy files, even if the destination file size and date matches the source file.     (/FORCECOPY)"
+    F1Keyword="VC.Project.VCX360DeploymentTool.ForceCopy"/>
+
+  <StringListProperty
+    Name="DeploymentFiles"
+    DisplayName="Deployment Files"
+    Category="DeployToHardDrive"
+    Switch="DeploymentFiles "
+    Description="Specifies the source media files to deploy as well as their target locations on the console or synthesized DVD media.  Select your own files or specify a Game Disc Layout file."
+    F1Keyword="VC.Project.VCX360DeploymentTool.DeploymentFiles">
+    <StringListProperty.ValueEditors>
+      <ValueEditor EditorType="XboxDeploymentFilesPropertyEditor" DisplayName="&lt;Edit...&gt;"/>
+    </StringListProperty.ValueEditors>
+  </StringListProperty>
+
+  <StringProperty
+    Name="RemoteRoot"
+    DisplayName="Deployment Root"
+    Category="DeployToHardDrive"
+    IncludeInCommandLine="false"
+    Description="The full path of the directory (on the Console) where all deployment files will be copied to. This sets the value of the RemoteRoot macros. Example value: devkit:\$(SolutionName)"
+    F1Keyword="VC.Project.VCX360DeploymentTool.RemoteRoot">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </StringProperty.DataSource>
+  </StringProperty>
+
+  <StringProperty
+    Name="RemotePath"
+    DisplayName="Remote Path"
+    Category="DeployToHardDrive"
+    IncludeInCommandLine="false"
+    Description="Remote Path : The full path (on the Console) where the xbe will be copied to. This sets the value of the RemotePath macros. Example value: devkit:\$(SolutionName)\$(TargetName).xex"
+    Visible="false">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </StringProperty.DataSource>
+  </StringProperty>
+
+  <!-- EmulateDvd -->
+
+  <EnumProperty
+    Name="DvdEmulationType"
+    DisplayName="Emulation Type"    
+    Category="EmulateDvd"
+    IncludeInCommandLine="false"
+    Description="The different search times determine the accuracy of the emulation. Only the Accurate Search Times emulation type requires a user-defined DVD layout file (.XGD)."
+    F1Keyword="VC.Project.VCX360DeploymentTool.EmulationType">
+    
+    <EnumValue
+      Name="ZeroSeekTimes"
+      DisplayName="Zero Seek Times"
+      Switch="TimingMode none"/>
+
+    <EnumValue
+      Name="TypicalSeekTimes"
+      DisplayName="Typical Seek Times"
+      Switch="TimingMode typical"/>
+    
+    <EnumValue
+      Name="AccurateSeekTimes"
+      DisplayName="Accurate Seek Times"
+      Switch="TimingMode accurate"/>
+    
+  </EnumProperty>
+
+  <StringProperty
+    Name="LayoutFile"
+    DisplayName="Layout File"
+    Category="EmulateDvd"
+    IncludeInCommandLine="false"
+    Description="User defined Game Disc Layout file (.xgd) that was created with the Xbox Game Disc Authoring Tool."
+    F1Keyword="VC.Project.VCX360DeploymentTool.EmulationLayout">
+    <StringProperty.ValueEditors>
+      <ValueEditor EditorType="DefaultStringPropertyEditor" DisplayName="&lt;Edit...&gt;"/>
+      <ValueEditor EditorType="XboxLayoutFilePropertyEditor" DisplayName="&lt;Browse...&gt;"/>
+    </StringProperty.ValueEditors>
+  </StringProperty>
+
+  <!-- Xenia : run the built title in the Xenia PC emulator. When Deployment Type
+       is "Xenia Emulator", F5 / Ctrl+F5 launches Xenia with this title (see
+       Platform.targets). Works for both the stock and clang toolsets. -->
+
+  <!-- The Xenia settings persist as project PROPERTIES (own DataSource, no
+       ItemType) so the platform can read $(RxdkXenia*) at evaluation time to
+       override the F5 launch. Shown here on the Console Deployment page. -->
+  <StringProperty
+    Name="RxdkXeniaPath"
+    DisplayName="Xenia Executable"
+    Category="Xenia"
+    Subtype="file"
+    Description="Full path to the Xenia executable (including the .exe), e.g. D:\xenia\xenia_canary.exe. Used when Deployment Type is Xenia Emulator (PC).">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="true"/>
+    </StringProperty.DataSource>
+    <StringProperty.ValueEditors>
+      <ValueEditor EditorType="DefaultStringPropertyEditor" DisplayName="&lt;Edit...&gt;"/>
+      <ValueEditor EditorType="DefaultFilePropertyEditor" DisplayName="&lt;Browse...&gt;"/>
+    </StringProperty.ValueEditors>
+  </StringProperty>
+
+  <StringProperty
+    Name="RxdkXeniaArgs"
+    DisplayName="Additional Xenia Arguments"
+    Category="Xenia"
+    Description="Extra command-line arguments passed to Xenia after the title (e.g. --license_mask=-1).">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="true"/>
+    </StringProperty.DataSource>
+  </StringProperty>
+
+  <BoolProperty
+    Name="RxdkXeniaHeadless"
+    DisplayName="Run Headless"
+    Category="Xenia"
+    Description="Pass --headless=true so Xenia runs without its window (useful for smoke tests / capturing the log).">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="true"/>
+    </BoolProperty.DataSource>
+  </BoolProperty>
+
+  <BoolProperty
+    Name="RxdkXeniaUseIso"
+    DisplayName="Launch as Disc Image (ISO)"
+    Category="Xenia"
+    Description="Build an Xbox 360 disc image (XISO/GDFX) from the title (as default.xex) plus the content folder, and boot THAT in Xenia instead of the bare XEX. Use when the title expects a disc layout (game:\ media).">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="true"/>
+    </BoolProperty.DataSource>
+  </BoolProperty>
+
+  <StringProperty
+    Name="RxdkXeniaDiscDir"
+    DisplayName="Disc Content Folder"
+    Category="Xenia"
+    Subtype="folder"
+    Description="Optional folder whose contents are laid into the disc root alongside default.xex (your media / game-data). Only used when 'Launch as Disc Image' is set.">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="true"/>
+    </StringProperty.DataSource>
+    <StringProperty.ValueEditors>
+      <ValueEditor EditorType="DefaultStringPropertyEditor" DisplayName="&lt;Edit...&gt;"/>
+      <ValueEditor EditorType="DefaultFolderPropertyEditor" DisplayName="&lt;Browse...&gt;"/>
+    </StringProperty.ValueEditors>
+  </StringProperty>
+
+  <StringProperty
+    Name="RxdkXdvdfsPath"
+    DisplayName="XDVDFS Tool"
+    Category="Xenia"
+    Subtype="file"
+    Description="Path to xdvdfs (Team-Resurgent/XDVDFS-TR) used to pack the disc image. Defaults to {RXDK-360}\bin\xdvdfs.exe.">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" HasConfigurationCondition="true"/>
+    </StringProperty.DataSource>
+    <StringProperty.ValueEditors>
+      <ValueEditor EditorType="DefaultStringPropertyEditor" DisplayName="&lt;Edit...&gt;"/>
+      <ValueEditor EditorType="DefaultFilePropertyEditor" DisplayName="&lt;Browse...&gt;"/>
+    </StringProperty.ValueEditors>
+  </StringProperty>
+
+  <!-- Command Line -->
+
+  <StringProperty
+    Name="AdditionalOptions"
+    Category="Command Line"
+    DisplayName="Additional Options"/>
+
+</Rule>

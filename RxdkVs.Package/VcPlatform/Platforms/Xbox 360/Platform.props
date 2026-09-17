@@ -1,0 +1,146 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.Cpp.Xbox 360.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\ImportBefore\*.props" Condition="Exists('$(VCTargetsPath)\Platforms\Xbox 360\ImportBefore')" />
+
+  <Import Condition="(exists('$(VCTargetsPath)\Platforms\Xbox 360\PlatformToolsets\$(PlatformToolset)\Toolset.props'))" Project="$(VCTargetsPath)\Platforms\Xbox 360\PlatformToolsets\$(PlatformToolset)\Toolset.props"/>
+
+  <!-- Compiled-signal properties. Modern MSBuild gates the _Lib/_Link build
+       orchestration (Microsoft.CppBuild.targets) on $(LibCompiled)/$(LinkCompiled),
+       normally set by the MSVC toolset's Microsoft.Cpp.Common.props keyed on
+       ConfigurationType. This platform is not an MSVC toolset and does not import
+       that file, so replicate the mapping here; otherwise static libraries are
+       never archived and applications/DLLs are never linked. -->
+  <PropertyGroup Condition="'$(ConfigurationType)' == 'Application'">
+    <LinkCompiled>true</LinkCompiled>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationType)' == 'DynamicLibrary'">
+    <LinkCompiled>true</LinkCompiled>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+    <LibCompiled>true</LibCompiled>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DebuggerFlavor Condition="'$(DebuggerFlavor)'==''">RxdkXbox360Debugger</DebuggerFlavor>
+    <!-- Project property the Console Deployment page binds to. New titles used to
+         leave this unset, so the dropdown was blank even though Deploy-item
+         metadata defaulted to EmulateDvd. Copy to Hard Drive matches F5 / DAP. -->
+    <DeploymentType Condition="'$(DeploymentType)'==''">CopyToHardDrive</DeploymentType>
+    <EmbedManifest>false</EmbedManifest>
+    
+    <!-- $(Xbox360InstallDir) is deprecated, and may be removed in a future XDK release.  Use $(XDKInstallDir) instead. -->
+    <Xbox360InstallDir Condition="'$(Xbox360InstallDir)' == '' ">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Xbox\2.0\SDK@InstallPath)</Xbox360InstallDir>
+    <Xbox360InstallDir Condition="'$(Xbox360InstallDir)' != '' and !HasTrailingSlash('$(Xbox360InstallDir)')">$(Xbox360InstallDir)\</Xbox360InstallDir>
+
+
+    <Xbox360TechPreviewInclude Condition="'$(Xbox360TechPreviewInclude)' == ''">;</Xbox360TechPreviewInclude>
+    <Xbox360TechPreviewLibrary Condition="'$(Xbox360TechPreviewLibrary)' == ''">;</Xbox360TechPreviewLibrary>
+    <Xbox360TechPreviewPath    Condition="'$(Xbox360TechPreviewPath)'    == ''">;</Xbox360TechPreviewPath>
+
+    <DefaultConsole>$(Registry:HKEY_CURRENT_USER\SOFTWARE\Microsoft\XenonSDK@XboxName)</DefaultConsole>
+  </PropertyGroup>  
+  
+  <!-- Tool Defaults -->
+  <PropertyGroup>
+    <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.xdb;*.xex</ExtensionsToDeleteOnClean>
+  </PropertyGroup>
+  
+  <!-- Whole Program Optimization -->
+  <PropertyGroup>
+    <WholeProgramOptimizationAvailabilityTrue Condition="(exists('$(VCTargetsPath)\Microsoft.Cpp.WholeProgramOptimization.props'))">true</WholeProgramOptimizationAvailabilityTrue>
+    <WholeProgramOptimizationAvailabilityInstrument Condition="(exists('$(VCTargetsPath)\Microsoft.Cpp.pginstrument.props'))">true</WholeProgramOptimizationAvailabilityInstrument>
+    <WholeProgramOptimizationAvailabilityOptimize Condition="(exists('$(VCTargetsPath)\Microsoft.Cpp.pgoptimize.props'))">true</WholeProgramOptimizationAvailabilityOptimize>
+    <WholeProgramOptimizationAvailabilityUpdate Condition="(exists('$(VCTargetsPath)\Microsoft.Cpp.pgupdate.props'))">true</WholeProgramOptimizationAvailabilityUpdate>
+  </PropertyGroup>
+
+  <ImportGroup Label="PropertySheets">
+    <!-- Core Xbox Libraries -->
+    <!--
+    <Import Condition="'$(NonCoreXbox360)' != 'true'" Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Cpp.Xbox 360.Core.props"/>
+    -->
+
+    <!-- Character Set -->
+    <Import Condition="'$(CharacterSet)' == 'Unicode'"    Project="$(VCTargetsPath)\microsoft.Cpp.UnicodeSupport.props"/>
+    <Import Condition="'$(CharacterSet)' == 'MultiByte'"  Project="$(VCTargetsPath)\microsoft.Cpp.MultiByteCharSupport.props"/>
+
+    <!-- Configuration Type -->
+    <Import Condition="'$(ConfigurationType)' == 'DynamicLibrary'"  Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Cpp.Xbox 360.DLL.props"/>
+    <Import Condition="'$(ConfigurationType)' == 'Application'"     Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Cpp.Xbox 360.Title.props"/>
+
+    <!-- Whole Program Optimization -->
+    <Import Condition="'$(WholeProgramOptimization)' == 'true'"           Project="$(VCTargetsPath)\Microsoft.Cpp.WholeProgramOptimization.props"/>
+    <Import Condition="'$(WholeProgramOptimization)' == 'PGInstrument'"   Project="$(VCTargetsPath)\Microsoft.Cpp.pginstrument.props"/>
+    <Import Condition="'$(WholeProgramOptimization)' == 'PGOptimize'"     Project="$(VCTargetsPath)\Microsoft.Cpp.pgoptimize.props"/>
+    <Import Condition="'$(WholeProgramOptimization)' == 'PGUpdate'"       Project="$(VCTargetsPath)\Microsoft.Cpp.pgupdate.props"/>
+
+    <!-- Overridden and additional CL and Link defaults -->
+    <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Cl.Xbox 360.props"/>
+    <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Link.Xbox 360.props"/>
+    <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Lib.Xbox 360.props"/>
+  </ImportGroup>
+
+  <!-- Debug + legacy: /Zi and linker /DEBUG so a C13 .pdb sits next to the XEX.
+       Official VS2010 Xbox 360 Debug projects set these in the vcxproj; the Link
+       props default GenerateDebugInformation to false. Copy-to-Drive F5 needs the
+       PDB (line info is not in .xdb). Modern Debug uses DWARF (-gdwarf-4 + KeepElf). -->
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' and '$(PlatformToolset)'=='2010-01'">
+    <ClCompile>
+      <DebugInformationFormat Condition="'%(ClCompile.DebugInformationFormat)'==''">ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation Condition="'%(Link.GenerateDebugInformation)'==''">true</GenerateDebugInformation>
+      <ProgramDatabaseFile Condition="'%(Link.ProgramDatabaseFile)'==''">$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <PropertyGroup Condition="'$(ConfigurationType)' != 'Makefile'">
+    <TargetExt  Condition="'$(TargetExt)'  == '' and '$(ConfigurationType)'=='StaticLibrary'">.lib</TargetExt>
+    <OutputFile Condition="'$(OutputFile)' == ''">$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+
+    <ImageXexOutput Condition="'$(ImageXexOutput)' == ''">$(OutDir)$(ProjectName).xex</ImageXexOutput>
+    <ImagePath>$([System.IO.Path]::Combine($(ProjectDir),$(ImageXexOutput)))</ImagePath>
+    <ImageDir>$([System.IO.Path]::GetDirectoryName($(ImagePath)))</ImageDir>
+    <ImageExt>$([System.IO.Path]::GetExtension($(ImagePath)))</ImageExt>
+    <ImageFileName>$([System.IO.Path]::GetFileName($(ImagePath)))</ImageFileName>
+    <ImageName>$([System.IO.Path]::GetFileNameWithoutExtension($(ImagePath)))</ImageName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ConfigurationType)'=='Makefile'">
+    <ForceImportAfterCppTargets>$(VCTargetsPath)\Platforms\$(Platform)\Platform.targets</ForceImportAfterCppTargets>
+  </PropertyGroup>
+
+  <ImportGroup Label="PropertySheets">
+    <!-- Xbox 360 specific tools -->
+    <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.ImageXex.Xbox 360.props"/>
+    <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Deploy.Xbox 360.props"/>
+  </ImportGroup>
+
+  <PropertyGroup>
+    <!-- Remote Xbox 360 debugger -->
+    <RemoteMachine>$(DefaultConsole)</RemoteMachine>
+    <Xbox360DebuggerMapDvdDrive>false</Xbox360DebuggerMapDvdDrive>
+    <Xbox360DebuggerAttach>False</Xbox360DebuggerAttach>
+
+    <RemoteRoot Condition="'$(RemoteRoot)'==''">devkit:\$(SolutionName)</RemoteRoot>
+    <RemotePath Condition="'$(RemotePath)'=='' and '$(ConfigurationType)' == 'Makefile'">%24(RemoteRoot)\%24(TargetFileName)</RemotePath>
+    <RemotePath Condition="'$(RemotePath)'=='' and '$(ConfigurationType)' == 'Application'">%24(RemoteRoot)\%24(ImageFileName)</RemotePath>
+    <RemotePath Condition="'$(RemotePath)'=='' and '$(ConfigurationType)' == 'DynamicLibrary'">%24(RemoteRoot)\%24(ImageFileName)</RemotePath>
+    <RemotePath Condition="'$(RemotePath)'==''">%24(RemoteRoot)\%24(TargetName)%24(TargetExt)</RemotePath>
+
+    <Xbox360DebuggerCommand>$(RemotePath)</Xbox360DebuggerCommand>
+    <Xbox360DebuggerCheckUpToDate>true</Xbox360DebuggerCheckUpToDate>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\ImportAfter\*.props" Condition="Exists('$(VCTargetsPath)\Platforms\Xbox 360\ImportAfter')" />
+</Project>

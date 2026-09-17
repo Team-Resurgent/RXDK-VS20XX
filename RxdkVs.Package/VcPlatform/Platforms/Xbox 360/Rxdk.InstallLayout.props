@@ -1,0 +1,34 @@
+<!--
+  RXDK-360 on-disk layout:
+
+    {app}\                      InstallPath / %RXDK360%
+      bin\win32\                stock XDK tools (cl, link, xbcp, xbdm.dll)
+      bin\xdvdfs.exe            Xenia disc packer
+      lib\win32\, ...           host libs (not xbox)
+      legacy\                   XdkPath  (headers + xbox import libs)
+        include\
+        lib\                    xbox .libs here (no xbox\ subfolder)
+      modern\                   clang/LLVM sidecar
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <RxdkInstallDir Condition="'$(RxdkInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\TeamResurgent\RXDK-360@InstallPath)</RxdkInstallDir>
+    <RxdkInstallDir Condition="'$(RxdkInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\TeamResurgent\RXDK-360@InstallPath)</RxdkInstallDir>
+    <RxdkInstallDir Condition="'$(RxdkInstallDir)' == '' and '$(RXDK360)' != ''">$(RXDK360)</RxdkInstallDir>
+    <RxdkInstallDir Condition="'$(RxdkInstallDir)' != '' and !HasTrailingSlash('$(RxdkInstallDir)')">$(RxdkInstallDir)\</RxdkInstallDir>
+
+    <XDKInstallDir Condition="'$(XDKInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\TeamResurgent\RXDK-360@XdkPath)</XDKInstallDir>
+    <XDKInstallDir Condition="'$(XDKInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\TeamResurgent\RXDK-360@XdkPath)</XDKInstallDir>
+    <XDKInstallDir Condition="'$(XDKInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Xbox\2.0\SDK@InstallPath)</XDKInstallDir>
+    <XDKInstallDir Condition="'$(XDKInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Xbox\2.0\SDK@InstallPath)</XDKInstallDir>
+    <XDKInstallDir Condition="'$(XDKInstallDir)' != '' and !HasTrailingSlash('$(XDKInstallDir)')">$(XDKInstallDir)\</XDKInstallDir>
+
+    <!-- RXDK-360 flattens stock lib\xbox into XdkPath\lib. Stock XEDK keeps lib\xbox. -->
+    <RxdkXboxLibDir Condition="'$(RxdkXboxLibDir)' == '' and '$(RxdkInstallDir)' != ''">$(XDKInstallDir)lib</RxdkXboxLibDir>
+    <RxdkXboxLibDir Condition="'$(RxdkXboxLibDir)' == ''">$(XDKInstallDir)lib\xbox</RxdkXboxLibDir>
+    <RxdkXboxLibDir Condition="'$(RxdkXboxLibDir)' != '' and !HasTrailingSlash('$(RxdkXboxLibDir)')">$(RxdkXboxLibDir)\</RxdkXboxLibDir>
+
+    <RxdkBinDir Condition="'$(RxdkBinDir)' == '' and '$(RxdkInstallDir)' != ''">$(RxdkInstallDir)bin\win32</RxdkBinDir>
+    <RxdkBinDir Condition="'$(RxdkBinDir)' == ''">$(XDKInstallDir)bin\win32</RxdkBinDir>
+  </PropertyGroup>
+</Project>

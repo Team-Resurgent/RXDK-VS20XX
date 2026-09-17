@@ -1,0 +1,67 @@
+<!--
+***********************************************************************************************
+Microsoft.Cl.Xbox 360.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- *******************************************************************************************
+        CLCompile
+       ******************************************************************************************* -->
+
+  <!-- Default cl options -->
+  <ItemDefinitionGroup>
+    <ClCompile>
+      
+      <!-- Overridden -->
+      <BufferSecurityCheck           Condition="'%(ClCompile.BufferSecurityCheck)'                    == ''">false</BufferSecurityCheck>
+      <EnablePREfast                 Condition="'%(ClCompile.EnablePREfast)'                          == ''">false</EnablePREfast>
+      <ErrorReporting                                                                                       >None</ErrorReporting>
+
+      <StringPooling                 Condition="'%(ClCompile.StringPooling)'                          == ''">false</StringPooling>
+      <MultiProcessorCompilation     Condition="'%(ClCompile.MultiProcessorCompilation)'              == ''">false</MultiProcessorCompilation>
+      <ExceptionHandling             Condition="'%(ClCompile.ExceptionHandling)'                      == ''">Sync</ExceptionHandling>
+      <FunctionLevelLinking          Condition="'%(ClCompile.FunctionLevelLinking)'                   == ''">false</FunctionLevelLinking>
+      <FloatingPointModel            Condition="'%(ClCompile.FloatingPointModel)'                     == 'Precise'">Fast</FloatingPointModel>
+      <FloatingPointModel            Condition="'%(ClCompile.FloatingPointModel)'                     == ''">Fast</FloatingPointModel>
+      <FloatingPointExceptions       Condition="'%(ClCompile.FloatingPointExceptions)'                == ''">false</FloatingPointExceptions>
+
+      <RuntimeTypeInfo               Condition="'%(ClCompile.RuntimeTypeInfo)'                        == ''">false</RuntimeTypeInfo>
+      <OpenMPSupport                 Condition="'%(ClCompile.OpenMPSupport)'                          == ''">false</OpenMPSupport>
+
+      <CompileAs                     Condition="'%(ClCompile.CompileAs)'                              == 'Default'">CompileAsCpp</CompileAs>
+      <CompileAs                     Condition="'%(ClCompile.CompileAs)'                              == ''">CompileAsCpp</CompileAs>
+
+      <!-- The following forced include prevents a large number of erroneous intellisense errors.  For details see PS bug#171256 Xbox 360 Console Software -->
+      <AdditionalOptions             Condition="'%(ClCompile.AdditionalOptions)'                      == ''">/FI"$(XDKInstallDir)\include\xbox\xbox_intellisense_platform.h"</AdditionalOptions>
+
+      <!-- Additional -->
+      <RegisterReservation            Condition="'%(ClCompile.RegisterReservation)'            == ''">false</RegisterReservation>
+      <TrapIntegerDividesOptimization Condition="'%(ClCompile.TrapIntegerDividesOptimization)' == ''">false</TrapIntegerDividesOptimization>
+      <PreschedulingOptimization      Condition="'%(ClCompile.PreschedulingOptimization)'      == ''">false</PreschedulingOptimization>
+      <InlineAssemblyOptimization     Condition="'%(ClCompile.InlineAssemblyOptimization)'     == ''">false</InlineAssemblyOptimization>
+      <AnalyzeStalls                  Condition="'%(ClCompile.AnalyzeStalls)'                  == ''">false</AnalyzeStalls>
+      <CallAttributedProfiling        Condition="'%(ClCompile.CallAttributedProfiling)'        == ''">Disabled</CallAttributedProfiling>
+      <PREfast                        Condition="'%(ClCompile.PREfast)'                        == ''">Disabled</PREfast>
+      <DeduceVariableType             Condition="'%(ClCompile.DeduceVariableType)'             == ''">Default</DeduceVariableType>
+
+      <!-- Modern MSBuild (VC v170/v180) requires these output-path metadata on
+           every ClCompile item; VS2010 supplied them from the core cl props,
+           which we no longer import. Without ProgramDataBaseFileName the
+           ComputeCLInputPDBName target fails with MSB4096. -->
+      <ObjectFileName           Condition="'%(ClCompile.ObjectFileName)'           == ''">$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName  Condition="'%(ClCompile.ProgramDataBaseFileName)'  == ''">$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <AssemblerListingLocation Condition="'%(ClCompile.AssemblerListingLocation)' == ''">$(IntDir)</AssemblerListingLocation>
+      <XMLDocumentationFileName Condition="'%(ClCompile.XMLDocumentationFileName)' == ''">$(IntDir)</XMLDocumentationFileName>
+      <BrowseInformationFile    Condition="'%(ClCompile.BrowseInformationFile)'    == ''">$(IntDir)</BrowseInformationFile>
+  </ClCompile>
+  </ItemDefinitionGroup>
+
+</Project>

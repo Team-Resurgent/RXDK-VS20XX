@@ -135,26 +135,223 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Custom 'Xbox' MSBuild platform (a thin alias to x64). The "Install Xbox Platform"
-         command copies this into each VS install's VCTargetsPath\Platforms so RXDK .vcxproj
-         projects (Platform=Xbox) load and build. Shipped under the extension's VcPlatform\. -->
-    <Content Include="VcPlatform\**\*">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <VSIXSubPath>VcPlatform\%(RecursiveDir)</VSIXSubPath>
+    <Content Include="VcPlatform\1033\General_Xbox360.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Real Xbox platform, actually does things unlike the previous one -->
-    <Content Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\RXDK\**\*">
+    <Content Include="VcPlatform\1033\General_Xbox.xml">
       <IncludeInVSIX>true</IncludeInVSIX>
-      <VSIXSubPath>ApplicationType\RXDK\%(RecursiveDir)</VSIXSubPath>
+      <VSIXSubPath>VcPlatform\1033\</VSIXSubPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>false</Visible>
     </Content>
-    <Content Include="$(SolutionDir)external\RXDK-Tools\src\Rxdk.MsBuild\bin\$(Configuration)\Rxdk.MsBuild.dll">
+    <Content Include="VcPlatform\1033\ImageBld.xml">
       <IncludeInVSIX>true</IncludeInVSIX>
-      <VSIXSubPath>ApplicationType\RXDK\Current</VSIXSubPath>
+      <VSIXSubPath>VcPlatform\1033\</VSIXSubPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>false</Visible>
+    </Content>
+    <Content Include="VcPlatform\1033\RxdkDebugger.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\1033\RxdkLib.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\1033\RxdkCompile.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\1033\RxdkLink.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\cl.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\debugger_remote.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\deploy.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\general.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\general_makefile.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\general_makefile_ps.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\general_ps.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\imagexex.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\lib.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\link.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\1033\nmake.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\1033\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Cl.Xbox 360.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Cpp.Xbox 360.Core.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Cpp.Xbox 360.DLL.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Cpp.Xbox 360.Title.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.CppCommon.Xbox 360.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Deploy.Xbox 360.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.ImageXex.Xbox 360.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Lib.Xbox 360.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Link.Xbox 360.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Microsoft.Makefile.Xbox 360.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Platform.Default.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Platform.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Platform.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\PlatformToolsets\2010-01\Toolset.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\PlatformToolsets\2010-01\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\PlatformToolsets\2010-01\Toolset.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\PlatformToolsets\2010-01\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\PlatformToolsets\RXDK\Toolset.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\PlatformToolsets\clang\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\PlatformToolsets\RXDK\Toolset.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\PlatformToolsets\clang\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox 360\Rxdk.InstallLayout.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox 360\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox\Platform.Common.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox\Platform.Default.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox\Platform.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox\Platform.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox\PlatformToolsets\RXDK\Toolset.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox\PlatformToolsets\RXDK\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Platforms\Xbox\PlatformToolsets\RXDK\Toolset.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\Platforms\Xbox\PlatformToolsets\RXDK\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Rxdk.MsBuild.props">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="VcPlatform\Rxdk.MsBuild.targets">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <VSIXSubPath>VcPlatform\</VSIXSubPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

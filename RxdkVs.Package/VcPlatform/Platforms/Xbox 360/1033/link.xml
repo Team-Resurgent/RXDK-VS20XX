@@ -1,0 +1,688 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Rule Name="Xbox360Link" PageTemplate="tool" SwitchPrefix="/" Order="20" xmlns="http://schemas.microsoft.com/build/2009/properties" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <Rule.DisplayName>
+    <sys:String>Linker</sys:String>
+  </Rule.DisplayName>
+  <Rule.Categories>
+    <Category Name="General">
+      <Category.DisplayName>
+        <sys:String>General</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <Category Name="Input">
+      <Category.DisplayName>
+        <sys:String>Input</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <!-- Xbox 360: Removed Manifest File -->
+    <Category Name="Debugging">
+      <Category.DisplayName>
+        <sys:String>Debugging</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <Category Name="System">
+      <Category.DisplayName>
+        <sys:String>System</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <Category Name="Optimization">
+      <Category.DisplayName>
+        <sys:String>Optimization</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <!-- Xbox 360: Removed Embedded IDL -->
+    <Category Name="Advanced">
+      <Category.DisplayName>
+        <sys:String>Advanced</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <Category Name="Command Line" Subtype="CommandLine">
+      <Category.DisplayName>
+        <sys:String>Command Line</sys:String>
+      </Category.DisplayName>
+    </Category>
+  </Rule.Categories>
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" ItemType="Link" Label="" HasConfigurationCondition="true" />
+  </Rule.DataSource>
+  <StringProperty Subtype="file" Name="OutputFile" Category="General" Switch="OUT" Separator=":" F1Keyword="VC.Project.VCLinkerTool.OutputFile">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </StringProperty.DataSource>
+    <StringProperty.DisplayName>
+      <sys:String>Output File</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /OUT option overrides the default name and location of the program that the linker creates.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <EnumProperty Name="ShowProgress" Category="General" F1Keyword="VC.Project.VCLinkerTool.ShowProgress">
+    <EnumProperty.DisplayName>
+      <sys:String>Show Progress</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Prints Linker Progress Messages</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="NotSet" Switch="">
+      <EnumValue.DisplayName>
+        <sys:String>Not Set</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>No verbosity.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="LinkVerbose" Switch="VERBOSE">
+      <EnumValue.DisplayName>
+        <sys:String>Display all progress messages</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Displays all progress messages. </sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="LinkVerboseLib" Switch="VERBOSE:Lib">
+      <EnumValue.DisplayName>
+        <sys:String>For Libraries Searched</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Displays progress messages indicating just the libraries searched</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="LinkVerboseICF" Switch="VERBOSE:ICF">
+      <EnumValue.DisplayName>
+        <sys:String>About COMDAT folding during optimized linking</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Displays information about COMDAT folding during optimized linking</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="LinkVerboseREF" Switch="VERBOSE:REF">
+      <EnumValue.DisplayName>
+        <sys:String>About data removed during optimized linking</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Displays information about functions and data removed during optimized linking</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="LinkVerboseSAFESEH" Switch="VERBOSE:SAFESEH">
+      <EnumValue.DisplayName>
+        <sys:String>About Modules incompatible with SEH</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Displays information about modoules incompatible with Safe Exception Handling </sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="LinkVerboseCLR" Switch="VERBOSE:CLR">
+      <EnumValue.DisplayName>
+        <sys:String>About linker activity related to managed code</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Display information about linker activity related to managed code</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <StringProperty Name="Version" Category="General" Switch="VERSION" Separator=":" F1Keyword="VC.Project.VCLinkerTool.Version">
+    <StringProperty.DisplayName>
+      <sys:String>Version</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /VERSION option tells the linker to put a version number in the header of the .exe or .dll file. Use DUMPBIN /HEADERS to see the image version field of the OPTIONAL HEADER VALUES to see the effect of /VERSION.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty ReverseSwitch="INCREMENTAL:NO" Name="LinkIncremental" Category="General" Switch="INCREMENTAL" F1Keyword="VC.Project.VCLinkerTool.LinkIncremental">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </BoolProperty.DataSource>
+    <BoolProperty.DisplayName>
+      <sys:String>Enable Incremental Linking</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Enables incremental linking.     (/INCREMENTAL, /INCREMENTAL:NO)</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="SuppressStartupBanner" Category="General" Switch="NOLOGO" F1Keyword="VC.Project.VCLinkerTool.SuppressStartupBanner">
+    <BoolProperty.DisplayName>
+      <sys:String>Suppress Startup Banner</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /NOLOGO option prevents display of the copyright message and version number. </sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="IgnoreImportLibrary" Category="General" F1Keyword="VC.Project.VCLinkerTool.IgnoreImportLibrary">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </BoolProperty.DataSource>
+    <BoolProperty.DisplayName>
+      <sys:String>Ignore Import Library</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies that the import library generated by this configuration should not be imported into dependent projects.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="RegisterOutput" Category="General" IncludeInCommandLine="false" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Register Output</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies whether to register the primary output of this build.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="PerUserRedirection" Category="General" IncludeInCommandLine="false" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Per-user Redirection</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>When Register Output is enabled, Per-user redirection forces registry writes to HKEY_CLASSES_ROOT to be redirected to HKEY_CURRENT_USER.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringListProperty Subtype="folder" Name="AdditionalLibraryDirectories" Category="General" Switch="LIBPATH:" F1Keyword="VC.Project.VCLinkerTool.AdditionalLibraryDirectories">
+    <StringListProperty.DisplayName>
+      <sys:String>Additional Library Directories</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Allows the user to override the environmental library path (/LIBPATH:folder)</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <BoolProperty Name="LinkLibraryDependencies" Category="General" IncludeInCommandLine="false" F1Keyword="VC.Project.VCLinkerTool.LinkLibraryDependencies">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="ProjectReference" Label="" HasConfigurationCondition="true" />
+    </BoolProperty.DataSource>
+    <BoolProperty.DisplayName>
+      <sys:String>Link Library Dependencies</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies whether or not library outputs from project dependencies are automatically linked in.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="UseLibraryDependencyInputs" Category="General" IncludeInCommandLine="false" F1Keyword="VC.Project.VCLinkerTool.UseLibraryDependencyInputs">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="ProjectReference" Label="" HasConfigurationCondition="true" />
+    </BoolProperty.DataSource>
+    <BoolProperty.DisplayName>
+      <sys:String>Use Library Dependency Inputs</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies whether or not the inputs to the librarian tool are used rather than the library file itself when linking in library outputs of project dependencies.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty ReverseSwitch="LTCG:NOSTATUS" Name="LinkStatus" Category="General" Switch="LTCG:STATUS" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Link Status</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies whether the linker should display a progress indicator showing what percentage of the link is complete. The default is to not display this status information. (/LTCG:STATUS|LTCG:NOSTATUS)</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty ReverseSwitch="ALLOWBIND:NO" Name="PreventDllBinding" Category="General" Switch="ALLOWBIND" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Prevent Dll Binding</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>/ALLOWBIND:NO sets a bit in a DLL's header that indicates to Bind.exe that the image is not allowed to be bound. You may not want a DLL to be bound if it has been digitally signed (binding invalidates the signature).</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty ReverseSwitch="WX:NO" Name="TreatLinkerWarningAsErrors" Category="General" Switch="WX" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Treat Linker Warning As Errors</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>/WX causes no output file to be generated if the linker generates a warning.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <EnumProperty Name="ForceFileOutput" Category="General" Visible="false">
+    <EnumProperty.DisplayName>
+      <sys:String>Force File Output</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>The /FORCE option tells the linker to create an .exe file or DLL even if a symbol is referenced but not defined or is multiply defined. It may create invalid exe file </sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="Enabled" Switch="FORCE">
+      <EnumValue.DisplayName>
+        <sys:String>Enabled</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>/FORCE with no arguments implies both multiple and unresolved.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="MultiplyDefinedSymbolOnly" Switch="FORCE:MULTIPLE">
+      <EnumValue.DisplayName>
+        <sys:String>Multiply Defined Symbol Only</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Use /FORCE:MULTIPLE to create an output file whether or not LINK finds more than one definition for a symbol.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="UndefinedSymbolOnly" Switch="FORCE:UNRESOLVED">
+      <EnumValue.DisplayName>
+        <sys:String>Undefined Symbol Only</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Use /FORCE:UNRESOLVED to create an output file whether or not LINK finds an undefined symbol. /FORCE:UNRESOLVED is ignored if the entry point symbol is unresolved.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <EnumProperty Name="CreateHotPatchableImage" Category="General" Visible="false">
+    <EnumProperty.DisplayName>
+      <sys:String>Create Hot Patchable Image</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Prepares an image for hotpatching.</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="Enabled" Switch="FUNCTIONPADMIN">
+      <EnumValue.DisplayName>
+        <sys:String>Enabled</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Prepares an image for hotpatching.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="X86Image" Switch="FUNCTIONPADMIN:5">
+      <EnumValue.DisplayName>
+        <sys:String>X86 Image Only</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Prepares an X86 image for hotpatching.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="X64Image" Switch="FUNCTIONPADMIN:6">
+      <EnumValue.DisplayName>
+        <sys:String>X64 Image Only</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Prepares an X64 image for hotpatching.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="ItaniumImage" Switch="FUNCTIONPADMIN:16">
+      <EnumValue.DisplayName>
+        <sys:String>Itanium Image Only</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Prepares an Itanium image for hotpatching.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <StringProperty Name="SpecifySectionAttributes" Category="General" Switch="SECTION" Separator=":" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Specify Section Attributes</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /SECTION option changes the attributes of a section, overriding the attributes set when the .obj file for the section was compiled.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Subtype="file" Name="MSDOSStubFileName" Category="General" Switch="STUB" Separator=":" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>MS-DOS Stub File Name</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /STUB option attaches an MS-DOS stub program to a Win32 program. </sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Subtype="folder" Name="TrackerLogDirectory" Category="General" IncludeInCommandLine="false" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Tracker Log Directory</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Tracker log directory.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringListProperty Subtype="file" Name="AdditionalDependencies" Category="Input" F1Keyword="VC.Project.VCLinkerTool.AdditionalDependencies">
+    <StringListProperty.DisplayName>
+      <sys:String>Additional Dependencies</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Specifies additional items to add to the link command line [i.e. kernel32.lib] </sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <BoolProperty Name="IgnoreAllDefaultLibraries" Category="Input" Switch="NODEFAULTLIB" F1Keyword="VC.Project.VCLinkerTool.IgnoreAllDefaultLibraries">
+    <BoolProperty.DisplayName>
+      <sys:String>Ignore All Default Libraries</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /NODEFAULTLIB option tells the linker to remove one or more default libraries from the list of libraries it searches when resolving external references. </sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringListProperty Subtype="file" Name="IgnoreSpecificDefaultLibraries" Category="Input" Switch="NODEFAULTLIB:" F1Keyword="VC.Project.VCLinkerTool.IgnoreDefaultLibraryNames">
+    <StringListProperty.DisplayName>
+      <sys:String>Ignore Specific Default Libraries</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Specifies one or more names of default libraries to ignore; separate multiple libraries with semi-colons.     (/NODEFAULTLIB:[name, name, ...])</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringProperty Subtype="file" Name="ModuleDefinitionFile" Category="Input" Switch="DEF" Separator=":" F1Keyword="VC.Project.VCLinkerTool.ModuleDefinitionFile">
+    <StringProperty.DisplayName>
+      <sys:String>Module Definition File</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /DEF option passes a module-definition file (.def) to the linker. Only one .def file can be specified to LINK. </sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  
+  <!-- Begin Xbox 360 -->
+  
+  <StringProperty
+    Subtype="file"
+    Name="AutomaticModuleDefinitionFile"
+    Category="Input"
+    DisplayName="Automatic Module Definition File"
+    Description="The /AutoDEF linker option provides a convenient way to manage creation of DEF files during development."
+    Switch="AutoDEF"
+    Separator=":"
+    F1Keyword="VC.Project.VCLinkerTool.AutomaticModuleDefinitionFile"/>
+  
+  <!-- End Xbox 360 -->
+  
+  <StringListProperty Subtype="file" Name="AddModuleNamesToAssembly" Category="Input" Switch="ASSEMBLYMODULE:" Visible="false">
+    <StringListProperty.DisplayName>
+      <sys:String>Add Module to Assembly</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>The /ASSEMBLYMODULE option allows you to add a module reference to an assembly. Type information in the module will not be available to the assembly program that added the module reference. However, type information in the module will be available to any program that references the assembly.</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringListProperty Subtype="file" Name="EmbedManagedResourceFile" Category="Input" Switch="ASSEMBLYRESOURCE:" Visible="false">
+    <StringListProperty.DisplayName>
+      <sys:String>Embed Managed Resource File</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>/ASSEMBLYRESOURCE embeds a resource file in the output file.</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringListProperty Subtype="file" Name="ForceSymbolReferences" Category="Input" Switch="INCLUDE:" F1Keyword="VC.Project.VCLinkerTool.ForceSymbolReferences">
+    <StringListProperty.DisplayName>
+      <sys:String>Force Symbol References</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>The /INCLUDE option tells the linker to add a specified symbol to the symbol table.</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringListProperty Subtype="file" Name="DelayLoadDLLs" Category="Input" Switch="DELAYLOAD:" Visible="false">
+    <StringListProperty.DisplayName>
+      <sys:String>Delay Loaded Dlls</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>The /DELAYLOAD option causes delayed loading of DLLs. The dllname specifies a DLL to delay load. </sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringListProperty Subtype="file" Name="AssemblyLinkResource" Category="Input" Switch="ASSEMBLYLINKRESOURCE:" Visible="false">
+    <StringListProperty.DisplayName>
+      <sys:String>Assembly Link Resource</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>The /ASSEMBLYLINKRESOURCE option creates a link to a .NET Framework resource in the output file; the resource file is not placed in the output file. </sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <!-- Xbox 360: Removed GenerateManifest -->
+  <!-- Xbox 360: Removed ManifestFile -->
+  <!-- Xbox 360: Removed AdditionalManifestDependencies -->
+  <!-- Xbox 360: Removed AllowIsolation -->
+  <!-- Xbox 360: Removed EnableUAC -->
+  <!-- Xbox 360: Removed UACExecutionLevel -->
+  <!-- Xbox 360: Removed UACUIAccess -->
+  <BoolProperty Name="GenerateDebugInformation" Category="Debugging" Switch="DEBUG" F1Keyword="VC.Project.VCLinkerTool.GenerateDebugInformation">
+    <BoolProperty.DisplayName>
+      <sys:String>Generate Debug Info</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /DEBUG option creates debugging information for the .exe file or DLL.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringProperty Subtype="file" Name="ProgramDatabaseFile" Category="Debugging" Switch="PDB" Separator=":" F1Keyword="VC.Project.VCLinkerTool.ProgramDatabaseFile">
+    <StringProperty.DisplayName>
+      <sys:String>Generate Program Database File</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>By default, when /DEBUG is specified, the linker creates a program database (PDB) which holds debugging information. The default file name for the PDB has the base name of the program and the extension .pdb.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Subtype="file" Name="StripPrivateSymbols" Category="Debugging" Switch="PDBSTRIPPED" Separator=":" F1Keyword="VC.Project.VCLinkerTool.StripPrivateSymbols">
+    <StringProperty.DisplayName>
+      <sys:String>Strip Private Symbols</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /PDBSTRIPPED option creates a second program database (PDB) file when you build your program image with any of the compiler or linker options that generate a PDB file (/DEBUG, /Z7, /Zd, or /Zi).</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="GenerateMapFile" Category="Debugging" Switch="MAP" F1Keyword="VC.Project.VCLinkerTool.GenerateMapFile">
+    <BoolProperty.DisplayName>
+      <sys:String>Generate Map File</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /MAP option tells the linker to create a mapfile.</sys:String>
+    </BoolProperty.Description>
+    <Argument Property="MapFileName" IsRequired="false" />
+  </BoolProperty>
+  <StringProperty Subtype="file" Name="MapFileName" Category="Debugging" Separator=":" F1Keyword="VC.Project.VCLinkerTool.MapFileName">
+    <StringProperty.DisplayName>
+      <sys:String>Map File Name</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>A user-specified name for the mapfile. It replaces the default name.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="MapExports" Category="Debugging" Switch="MAPINFO:EXPORTS" F1Keyword="VC.Project.VCLinkerTool.MapExports">
+    <BoolProperty.DisplayName>
+      <sys:String>Map Exports</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /MAPINFO option tells the linker to include the specified information in a mapfile, which is created if you specify the /MAP option. EXPORTS tells the linker to include exported functions.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <!-- Xbox 360: Removed AssemblyDebug -->
+  <!-- Xbox 360: Removed SubSystem -->
+  <!-- Xbox 360: Removed MinimumRequiredVersion -->
+  <StringProperty Name="HeapReserveSize" Category="System" Switch="HEAP" Separator=":" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Heap Reserve Size</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies total heap allocation size in virtual memory. Default is 1MB.    (/HEAP:reserve)</sys:String>
+    </StringProperty.Description>
+    <Argument Property="HeapCommitSize" IsRequired="false" Separator="," />
+  </StringProperty>
+  <StringProperty Name="HeapCommitSize" Category="System" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Heap Commit Size</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies total heap allocation size in physical memory. Default is 4KB.    (/HEAP:reserve,commit)</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Name="StackReserveSize" Category="System" Switch="STACK" Separator=":" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Stack Reserve Size</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies the total stack allocation size in virtual memory. Default is 1MB.     (/STACK:reserve)</sys:String>
+    </StringProperty.Description>
+    <Argument Property="StackCommitSize" IsRequired="false" Separator="," />
+  </StringProperty>
+  <StringProperty Name="StackCommitSize" Category="System" F1Keyword="VC.Project.VCLinkerTool.StackCommitSize">
+    <StringProperty.DisplayName>
+      <sys:String>Stack Commit Size</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies the total stack allocation size in physical memory. Default is 4KB.     (/STACK:reserve,commit)</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <!-- Xbox 360: Removed LargeAddressAware -->
+  <!-- Xbox 360: Removed TerminalServerAware -->
+  <!-- Xbox 360: Removed SwapRunFromCD -->
+  <!-- Xbox 360: Removed SwapRunFromNET -->
+  <!-- Xbox 360: Removed Driver -->
+  <BoolProperty ReverseSwitch="OPT:NOREF" Name="OptimizeReferences" Category="Optimization" Switch="OPT:REF" F1Keyword="VC.Project.VCLinkerTool.OptimizeReferences">
+    <BoolProperty.DisplayName>
+      <sys:String>References</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>/OPT:REF eliminates functions and/or data that are never referenced while /OPT:NOREF keeps functions and/or data that are never referenced. </sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty ReverseSwitch="OPT:NOICF" Name="EnableCOMDATFolding" Category="Optimization" Switch="OPT:ICF" F1Keyword="VC.Project.VCLinkerTool.EnableCOMDATFolding">
+    <BoolProperty.DisplayName>
+      <sys:String>Enable COMDAT Folding</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Use /OPT:ICF[=iterations] to perform identical COMDAT folding. </sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringProperty Subtype="file" Name="FunctionOrder" Category="Optimization" Switch="ORDER" Separator=":@" F1Keyword="VC.Project.VCLinkerTool.FunctionOrder">
+    <StringProperty.DisplayName>
+      <sys:String>Function Order</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /ORDER option tells LINK to optimize your program by placing certain COMDATs into the image in a predetermined order. LINK places the functions in the specified order within each section in the image.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Subtype="file" Name="ProfileGuidedDatabase" Category="Optimization" Switch="PGD" Separator=":" F1Keyword="VC.Project.VCLinkerTool.ProfileGuidedDatabase">
+    <StringProperty.DisplayName>
+      <sys:String>Profile Guided Database</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specify .pgd file for profile guided optionizations. (/PGD)</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <EnumProperty Name="LinkTimeCodeGeneration" Category="Optimization" F1Keyword="VC.Project.VCLinkerTool.LinkTimeCodeGeneration">
+    <EnumProperty.DisplayName>
+      <sys:String>Link Time Code Generation</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Specifies link-time code generation</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="Default" Switch="">
+      <EnumValue.DisplayName>
+        <sys:String>Default</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Default LTCG setting.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="UseLinkTimeCodeGeneration" Switch="LTCG">
+      <EnumValue.DisplayName>
+        <sys:String>Use Link Time Code Generation</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Use Link Time Code Generation</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="PGInstrument" Switch="LTCG:PGInstrument">
+      <EnumValue.DisplayName>
+        <sys:String>Profile Guided Optimization - Instrument</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Specifies link-time code generation</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="PGOptimization" Switch="LTCG:PGOptimize">
+      <EnumValue.DisplayName>
+        <sys:String>Profile Guided Optimization - Optimization</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Specifies that the linker should use the profile data created after running the instrumented binary to create an optimized image.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="PGUpdate" Switch="LTCG:PGUpdate">
+      <EnumValue.DisplayName>
+        <sys:String>Profile Guided Optimization - Update</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Allows and tracks list of input files to be added or modified from what was specified in the :PGINSTRUMENT phase.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <!-- Xbox 360: Removed MidlCommandFile -->
+  <!-- Xbox 360: Removed IgnoreEmbeddedIDL -->
+  <!-- Xbox 360: Removed MergedIDLBaseFileName -->
+  <!-- Xbox 360: Removed TypeLibraryFile -->
+  <!-- Xbox 360: Removed TypeLibraryResourceID -->
+  <StringProperty Name="EntryPointSymbol" Category="Advanced" Switch="ENTRY" Separator=":" F1Keyword="VC.Project.VCLinkerTool.EntryPointSymbol">
+    <StringProperty.DisplayName>
+      <sys:String>Entry Point</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /ENTRY option specifies an entry point function as the starting address for an .exe file or DLL.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="NoEntryPoint" Category="Advanced" Switch="NOENTRY" F1Keyword="VC.Project.VCLinkerTool.ResourceOnlyDLL">
+    <BoolProperty.DisplayName>
+      <sys:String>No Entry Point</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /NOENTRY option is required for creating a resource-only DLL.Use this option to prevent LINK from linking a reference to _main into the DLL.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="SetChecksum" Category="Advanced" Switch="RELEASE" F1Keyword="VC.Project.VCLinkerTool.SetChecksum">
+    <BoolProperty.DisplayName>
+      <sys:String>Set Checksum</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /RELEASE option sets the Checksum in the header of an .exe file.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringProperty Name="BaseAddress" Category="Advanced" Switch="BASE" Separator=":" F1Keyword="VC.Project.VCLinkerTool.BaseAddress">
+    <StringProperty.DisplayName>
+      <sys:String>Base Address</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Sets a base address for the program (/BASE:{address[,size] | @filename,key})</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <!-- Xbox 360: Removed RandomizedBaseAddress -->
+  <BoolProperty ReverseSwitch="FIXED:NO" Name="FixedBaseAddress" Category="Advanced" Switch="FIXED" F1Keyword="VC.Project.VCLinkerTool.FixedBaseAddress">
+    <BoolProperty.DisplayName>
+      <sys:String>Fixed Base Address</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Creates a program that can be loaded only at its preferred base address (/FIXED[:NO])</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <!-- Xbox 360: Removed DataExecutionPrevention -->
+  <!-- Xbox 360: Removed TurnOffAssemblyGeneration -->
+  <!-- Xbox 360: Removed SupportUnloadOfDelayLoadedDLL -->
+  <!-- Xbox 360: Removed SupportNobindOfDelayLoadedDL -->
+  <StringProperty Subtype="file" Name="ImportLibrary" Category="Advanced" Switch="IMPLIB" Separator=":" F1Keyword="VC.Project.VCLinkerTool.ImportLibrary">
+    <StringProperty.DisplayName>
+      <sys:String>Import Library</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Overrides the default import library name (/IMPLIB:filename)</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Name="MergeSections" Category="Advanced" Switch="MERGE" Separator=":" F1Keyword="VC.Project.VCLinkerTool.MergeSections">
+    <StringProperty.DisplayName>
+      <sys:String>Merge Sections</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /MERGE option combines the first section (from) with the second section (to), naming the resulting section to. For example, /merge:.rdata=.text.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <!-- Xbox 360: Removed TargetMachine -->
+  <!-- Xbox 360: Removed Profile -->
+  <!-- Xbox 360: Removed CLRThreadAttribute -->
+  <!-- Xbox 360: Removed CLRImageType -->
+  <!-- Xbox 360: Removed KeyFile -->
+  <!-- Xbox 360: Removed KeyContainer -->
+  <!-- Xbox 360: Removed DelaySign -->
+  <!-- Xbox 360: Removed CLRUnmanagedCodeCheck -->
+  <EnumProperty Name="LinkErrorReporting" DisplayName="Error Reporting" Description="Error Reporting : Specifies how internal tool errors should be reported back to Microsoft.  The default in the IDE is prompt.  The default from command line builds is queue.     (/errorReport:[method])" Category="Advanced" F1Keyword="VC.Project.VCLinkerTool.ErrorReporting">
+    <EnumValue Name="PromptImmediately" Switch="ERRORREPORT:PROMPT" DisplayName="Prompt Immediately (/ERRORREPORT:PROMPT)" Description="Prompt immediately.">
+    </EnumValue>
+    <EnumValue Name="QueueForNextLogin" Switch="ERRORREPORT:QUEUE" DisplayName="Queue For Next Login (/ERRORREPORT:QUEUE)" Description="Queue for next login.">
+    </EnumValue>
+  </EnumProperty>
+  <!-- Xbox 360: Removed SectionAlignment -->
+  <!-- Xbox 360: Removed CLRSupportLastError -->
+  <!-- Xbox 360: Removed ImageHasSafeExceptionHandlers -->
+  <BoolProperty Name="LinkDLL" Switch="DLL" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>LinkDLL</sys:String>
+    </BoolProperty.DisplayName>
+  </BoolProperty>
+  <StringProperty Name="AdditionalOptions" Category="Command Line">
+    <StringProperty.DisplayName>
+      <sys:String>Additional Options</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Additional Options</sys:String>
+    </StringProperty.Description>
+  </StringProperty>  
+</Rule>

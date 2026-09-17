@@ -1,0 +1,50 @@
+<!--
+***********************************************************************************************
+Microsoft.ImageXex.Xbox 360.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- *******************************************************************************************
+        ImageXex
+       ******************************************************************************************* -->
+
+  <!-- Default ImageXex options -->
+  <ItemDefinitionGroup>
+    <ImageXex>
+
+      <InputFile               Condition="'%(ImageXex.InputFile)'               == ''">$(OutputFile)</InputFile>
+      <ImageXexOutput          Condition="'$(ImageXexOutput)'                   != ''">$(ImageXexOutput)</ImageXexOutput>
+      <ImageXexOutput          Condition="'$(ImageXexOutput)'                   == ''">$(OutDir)$(ProjectName).xex</ImageXexOutput>
+      <TitleID                 Condition="'%(ImageXex.TitleID)'                 == ''"></TitleID>
+      <LanKey                  Condition="'%(ImageXex.LanKey)'                  == ''"></LanKey>
+      <SuppressStartupBanner   Condition="'%(ImageXex.SuppressStartupBanner)'   == ''">true</SuppressStartupBanner>
+      <BaseAddress             Condition="'%(ImageXex.BaseAddress)'             == ''"></BaseAddress>
+      <HeapSize                Condition="'%(ImageXex.HeapSize)'                == ''"></HeapSize>
+      <WorkspaceSize           Condition="'%(ImageXex.WorkspaceSize)'           == ''"></WorkspaceSize>
+      <AdditionalSections      Condition="'%(ImageXex.AdditionalSections)'      == ''"></AdditionalSections>
+      <ExportByName            Condition="'%(ImageXex.ExportByName)'            == ''">false</ExportByName>
+      <OpticalDiscDriveMapping Condition="'%(ImageXex.OpticalDiscDriveMapping)' == ''">false</OpticalDiscDriveMapping>
+      <Pal50Incompatible       Condition="'%(ImageXex.Pal50Incompatible)'       == ''">false</Pal50Incompatible>
+      <MultiDiscTitle          Condition="'%(ImageXex.MultiDiscTitle)'          == ''">false</MultiDiscTitle>
+      <PreferBigButtonInput    Condition="'%(ImageXex.PreferBigButtonInput)'    == ''">false</PreferBigButtonInput>
+      <CrossPlatformSystemLink Condition="'%(ImageXex.CrossPlatformSystemLink)' == ''">false</CrossPlatformSystemLink>
+      <AllowAvatarGetMetadata  Condition="'%(ImageXex.AllowAvatarGetMetadata)'  == ''">false</AllowAvatarGetMetadata>
+      <AllowControllerSwapping Condition="'%(ImageXex.AllowControllerSwapping)' == ''">false</AllowControllerSwapping>
+      <RequireFullExperience   Condition="'%(ImageXex.RequireFullExperience)'   == ''">false</RequireFullExperience>
+      <GameVoiceRequiredUI     Condition="'%(ImageXex.GameVoiceRequiredUI)'     == ''">false</GameVoiceRequiredUI>
+      <ConfigurationFile       Condition="'%(ImageXex.ConfigurationFile)'       == ''"></ConfigurationFile>
+      <KinectElevationControl  Condition="'%(ImageXex.KinectElevationControl)'  == ''">false</KinectElevationControl>
+      <KinectSupportLevel      Condition="'%(ImageXex.KinectSupportLevel)'      == ''">none</KinectSupportLevel>
+
+    </ImageXex>
+  </ItemDefinitionGroup>
+
+</Project>

@@ -1,0 +1,37 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.Cpp.Xbox 360.default.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PlatformShortName>xbox</PlatformShortName>
+    <PlatformArchitecture>32</PlatformArchitecture>
+    <PlatformToolset Condition="'$(PlatformToolset)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0@DefaultXbox360PlatformToolset)</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)' == ''">2010-01</PlatformToolset>
+
+    <ConfigurationName Condition="'$(ConfigurationName)' == ''">$(Configuration)</ConfigurationName>
+    <ProjectDir        Condition="'$(ProjectDir)'        == ''">$(MSBuildProjectDirectory)\</ProjectDir>
+
+    <!-- Normally supplied by the MSVC toolset's core props, which this platform
+         does not import; without them the output file is named ".lib"/".xex". -->
+    <ProjectName Condition="'$(ProjectName)' == ''">$(MSBuildProjectName)</ProjectName>
+    <TargetName  Condition="'$(TargetName)'  == ''">$(ProjectName)</TargetName>
+
+    <IntDir Condition="'$(IntDir)'=='' AND '$(IntermediateOutputPath)' != ''">$(IntermediateOutputPath)</IntDir>
+    <IntDir Condition="'$(IntDir)'=='' AND '$(IntermediateOutputPath)' == '' AND '$(RunCodeAnalysisOnce)'=='true'">$(Configuration)\CodeAnalysis\</IntDir>
+    <IntDir Condition="'$(IntDir)'=='' AND '$(IntermediateOutputPath)' == ''">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(OutDir)'=='' AND '$(ProjectDir)'             != ''">$(ProjectDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(OutDir)'=='' AND '$(ProjectDir)'             == ''">$(IntDir)</OutDir>
+
+    <BuildLogFile Condition="'$(BuildLogFile)'==''">$(IntDir)BuildLog.txt</BuildLogFile>
+    <CharacterSet Condition="'$(CharacterSet)'==''">MultiByte</CharacterSet>
+  </PropertyGroup>
+</Project>

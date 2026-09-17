@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cosmetic debugger flavor. Name must NOT be Xbox360Debugger — VC special-cases
+  that stock XDK flavor and DebugLaunchs a missing AD7 engine, which shows
+  "Unable to start debugging. Check your debugger settings...".
+  Same pattern as original-Xbox RxdkXboxDebugger. F5 is the interceptor + DAP.
+-->
+<Rule Name="RxdkXbox360Debugger"
+      DisplayName="Xbox 360 Debugger (RXDK)"
+      PageTemplate="debugger"
+      Description="Debug the title on an Xbox 360 devkit (RXDK-360)."
+      xmlns="http://schemas.microsoft.com/build/2009/properties">
+  <Rule.DataSource>
+    <DataSource Persistence="UserFile" />
+  </Rule.DataSource>
+  <StringProperty Name="RxdkXbox360DebuggerInfo"
+                  DisplayName="Debugger"
+                  Description="F5 builds, copies the XEX to the kit, and debugs over XBDM. There are no local process options."
+                  ReadOnly="true"
+                  Default="RXDK-360 Xbox 360 debug adapter" />
+</Rule>

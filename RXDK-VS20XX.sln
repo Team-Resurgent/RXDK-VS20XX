@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rxdk.Dap", "external\RXDK-T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxdkVs.Package", "RxdkVs.Package\RxdkVs.Package.csproj", "{C5390B93-36FF-4DE6-9CA3-3776D9C709BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rxdk.MsBuild", "external\RXDK-Tools\src\Rxdk.MsBuild\Rxdk.MsBuild.csproj", "{72C2CD82-4280-44FE-B5C9-8362611DC6F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rxdk.MsBuild", "Rxdk.MsBuild\Rxdk.MsBuild.csproj", "{72C2CD82-4280-44FE-B5C9-8362611DC6F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

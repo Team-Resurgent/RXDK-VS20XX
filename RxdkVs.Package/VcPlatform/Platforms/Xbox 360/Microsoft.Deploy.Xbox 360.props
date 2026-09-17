@@ -1,0 +1,44 @@
+<!--
+***********************************************************************************************
+Microsoft.Deploy.Xbox 360.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- *******************************************************************************************
+        Deploy
+       ******************************************************************************************* -->
+
+  <!-- Default Deploy options -->
+  <ItemDefinitionGroup>
+    <Deploy>
+
+      <!-- Base Deploy -->
+      <DeploymentType        Condition="'%(Deploy.DeploymentType)'        == ''">CopyToHardDrive</DeploymentType>
+      <TargetConsole         Condition="'%(Deploy.TargetConsole)'         == ''">$(RemoteMachine)</TargetConsole>
+      <SuppressStartupBanner Condition="'%(Deploy.SuppressStartupBanner)' == ''">true</SuppressStartupBanner>
+      <ExcludedFromBuild     Condition="'%(Deploy.ExcludedFromBuild)'     == ''">false</ExcludedFromBuild>
+
+      <!-- DeployToHardDrive -->      
+      <Progress              Condition="'%(Deploy.Progress)'              == ''">false</Progress>
+      <ForceCopy             Condition="'%(Deploy.ForceCopy)'             == ''">false</ForceCopy>
+      <DeploymentFiles       Condition="'%(Deploy.DeploymentFiles)'       == '' and '$(ConfigurationType)' != 'Makefile'">$(RemoteRoot)=$(ImagePath)</DeploymentFiles>
+      <DeploymentFiles       Condition="'%(Deploy.DeploymentFiles)'       == '' and '$(ConfigurationType)' == 'Makefile'">$(RemoteRoot)=$(TargetPath)</DeploymentFiles>
+      <RemoteRoot            Condition="'$(RemoteRoot)'                   != ''">$(RemoteRoot)</RemoteRoot>
+      <RemoteRoot            Condition="'$(RemoteRoot)'                   == ''">devkit:\$(SolutionName)</RemoteRoot>
+
+      <!-- EmulateDvd -->
+      <DvdEmulationType      Condition="'%(Deploy.DvdEmulationType)'      == ''">ZeroSeekTimes</DvdEmulationType>
+      <LayoutFile            Condition="'%(Deploy.LayoutFile)'            == ''">&lt;Use Deployment Files&gt;</LayoutFile>
+
+    </Deploy>
+  </ItemDefinitionGroup>
+
+</Project>

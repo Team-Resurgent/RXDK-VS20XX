@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Rule Name="ConfigurationGeneral" PageTemplate="generic" xmlns="http://schemas.microsoft.com/build/2009/properties" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <Rule.DisplayName>
+    <sys:String>General</sys:String>
+  </Rule.DisplayName>
+  <Rule.Description>
+    <sys:String>General</sys:String>
+  </Rule.Description>
+  <Rule.Categories>
+    <Category Name="General">
+      <Category.DisplayName>
+        <sys:String>General</sys:String>
+      </Category.DisplayName>
+      <Category.Description>
+        <sys:String>General</sys:String>
+      </Category.Description>
+    </Category>
+  </Rule.Categories>
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" Label="Configuration">
+    </DataSource>
+  </Rule.DataSource>
+  <StringProperty Name="OutDir" Category="General" Default="$(ProjectDir)$(Configuration)\" Subtype="folder">
+    <StringProperty.DisplayName>
+      <sys:String>Output Directory</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a relative path to the output file directory; can include environment variables.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="IntDir" Category="General" Default="$(Configuration)\" Subtype="folder">
+    <StringProperty.DisplayName>
+      <sys:String>Intermediate Directory</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a relative path to the intermediate file directory; can include environment variables.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="TargetName" Category="General" Default="$(ProjectName)" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Target Name</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a file name that this project will generate.</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringProperty Name="TargetExt" Category="General" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Target Extension</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies a file extension that this project will generate. (Example: .exe or .dll)</sys:String>
+    </StringProperty.Description>
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringProperty.DataSource>
+  </StringProperty>
+  <StringListProperty Name="ExtensionsToDeleteOnClean" Category="General" Separator=";">
+    <StringListProperty.DisplayName>
+      <sys:String>Extensions to Delete on Clean</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Semi-colon delimited wildcard specification for which files in the intermediate directory to delete on clean or rebuild.</sys:String>
+    </StringListProperty.Description>
+    <StringListProperty.DataSource>
+      <DataSource Persistence="ProjectFile">
+      </DataSource>
+    </StringListProperty.DataSource>
+  </StringListProperty>
+  <StringProperty Name="BuildLogFile" Category="General" Default="$(IntDir)BuildLog.txt" Subtype="file">
+    <StringProperty.DisplayName>
+      <sys:String>Build Log File</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specifies the build log file to write to when build logging is enabled.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="EnableManagedIncrementalBuild" Category="General" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Enable Managed Incremental Build</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Instructs the project system to analyze referenced assemblies for changes before triggering a rebuild of the managed project.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+</Rule>

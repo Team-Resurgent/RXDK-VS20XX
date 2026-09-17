@@ -1,0 +1,53 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.Cpp.Xbox 360.2010-01.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\ImportBefore\*.2010-01.props" Condition="Exists('$(VCTargetsPath)\Platforms\Xbox 360\ImportBefore')" />
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Rxdk.InstallLayout.props" />
+
+  <PropertyGroup>
+    <PlatformToolsetVersion>100</PlatformToolsetVersion>
+    <VCInstallDir>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\10.0\Setup\VC@ProductDir)</VCInstallDir>
+    <VCInstallDir Condition="'$(VCInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0\Setup\VC@ProductDir)</VCInstallDir>
+
+    <!-- RXDK-360: Rxdk.InstallLayout.props sets RxdkInstallDir / XDKInstallDir
+         (product root) and RxdkBinDir ({app}\bin\win32). Stock Xbox 2.0 SDK is
+         last-resort so a setup that points RXDK-360 at an existing stock XDK still
+         works. Override per-project with <XDKInstallDir> / <RxdkInstallDir>. -->
+
+    <VSInstallDir>$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\10.0\Setup\VS@ProductDir)</VSInstallDir>
+    <VSInstallDir Condition="'$(VSInstallDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\10.0\Setup\VS@ProductDir)</VSInstallDir>
+
+    <WindowsSdkDir Condition="'$(UseEnv)' != 'true'">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A@InstallationFolder)</WindowsSdkDir>
+    <WindowsSdkDir Condition="'$(WindowsSdkDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v7.0A@InstallationFolder)</WindowsSdkDir>
+
+    <FrameworkDir Condition="'$(UseEnv)' != 'true'">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework@InstallRoot)</FrameworkDir>
+    <FrameworkDir Condition="'$(FrameworkDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\.NETFramework@InstallRoot)</FrameworkDir>
+
+    <FrameworkSdkDir Condition="'$(UseEnv)' != 'true'">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework@SDKInstallRootv4.0)</FrameworkSdkDir>
+    <FrameworkSdkDir Condition="'$(FrameworkSdkDir)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\.NETFramework@SDKInstallRootv4.0)</FrameworkSdkDir>
+
+    <ExecutablePath Condition="'$(ExecutablePath)' == ''">$(Xbox360TechPreviewPath);$(RxdkBinDir);$(WindowsSdkDir)\bin\NETFX 4.0 Tools;$(WindowsSDKDir)\bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)bin;$(MSBuildToolsPath);$(VSInstallDir);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <IncludePath Condition="'$(IncludePath)' == ''">$(Xbox360TechPreviewInclude);$(XDKInstallDir)\include\xbox;</IncludePath>
+    <LibraryPath Condition="'$(LibraryPath)' == ''">$(Xbox360TechPreviewLibrary);$(RxdkXboxLibDir);</LibraryPath>
+    <ReferencePath Condition="'$(ReferencePath)' == ''">$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib</ReferencePath>
+    <SourcePath Condition="'$(SourcePath)' == ''">$(RxdkInstallDir)source\crt;$(RxdkInstallDir)source\crt\sys;$(VCInstallDir)atlmfc\src\mfc;$(VCInstallDir)atlmfc\src\mfcm;$(VCInstallDir)atlmfc\src\atl;</SourcePath>
+    <ExcludePath Condition="'$(ExcludePath)' == ''">$(XDKInstallDir)\include\xbox;$(XDKInstallDir)\include\xbox\sys;$(XDKInstallDir)\include\xbox\codeanalysis;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)\include;$(FrameworkSDKDir)include;$(MSBuildToolsPath);$(VCInstallDir)atlmfc\lib;$(VCInstallDir)lib;</ExcludePath>
+    <NativeExecutablePath Condition="'$(NativeExecutablePath)' == ''">$(ExecutablePath)</NativeExecutablePath>
+    <!-- Surfaced read-only on the General property page (general.xml ->
+         RxdkToolchainDisplay) so it is obvious at a glance which toolchain a
+         project builds with. The modern clang toolset sets "Modern (clang/LLVM)". -->
+    <RxdkToolchain Condition="'$(RxdkToolchain)' == ''">Legacy (stock XDK)</RxdkToolchain>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\ImportAfter\*.2010-01.props" Condition="Exists('$(VCTargetsPath)\Platforms\Xbox 360\ImportAfter')" />
+</Project>

@@ -1,0 +1,647 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.Cpp.Xbox 360.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file defines the steps/targets required to build Visual C++ projects
+specifically on x86 platforms.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\ImportBefore\*.targets" Condition="Exists('$(VCTargetsPath)\Platforms\Xbox 360\ImportBefore')" />
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.CppCommon.Xbox 360.targets"/>
+  <Import Project="$(VCTargetsPath)\Microsoft.CppCommon.targets" Condition="'$(ConfigurationType)'!='Makefile'"/>
+
+  <!-- Load from the VC toolset directory (sibling of Microsoft.Build.CPPTasks.Common.dll).
+       The assembly references that VC task base; LoadFrom the platform folder cannot
+       resolve it, and MSBuild 18 then instantiates a metadata-only type (MSB4061).
+       Do not set Runtime/Architecture: Architecture="x86" on 64-bit VS forces the same
+       out-of-proc MetadataLoadContext path. Stock CL UsingTask is in-proc for the same reason. -->
+  <UsingTask TaskName="Xbox360CL"         AssemblyFile="$(MSBuildThisFileDirectory)..\..\Rxdk.Xbox360.Build.dll"/>
+  <UsingTask TaskName="Xbox360Link"       AssemblyFile="$(MSBuildThisFileDirectory)..\..\Rxdk.Xbox360.Build.dll"/>
+  <UsingTask TaskName="ImageXex"          AssemblyFile="$(MSBuildThisFileDirectory)..\..\Rxdk.Xbox360.Build.dll"/>
+  <UsingTask TaskName="DeployToHardDrive" AssemblyFile="$(MSBuildThisFileDirectory)..\..\Rxdk.Xbox360.Build.dll"/>
+  <UsingTask TaskName="EmulateDvd"        AssemblyFile="$(MSBuildThisFileDirectory)..\..\Rxdk.Xbox360.Build.dll"/>
+
+
+  <PropertyGroup>
+    <!-- Enable incremental build by enable file tracking in tasks-->
+    <TrackFileAccess Condition="'$(TrackFileAccess)' == ''">true</TrackFileAccess>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ConfigurationType)' != 'Makefile'">
+    <ImagePath>$([System.IO.Path]::Combine($(ProjectDir),$(ImageXexOutput)))</ImagePath>
+    <ImageDir>$([System.IO.Path]::GetDirectoryName($(ImagePath)))</ImageDir>
+    <ImageExt>$([System.IO.Path]::GetExtension($(ImagePath)))</ImageExt>
+    <ImageFileName>$([System.IO.Path]::GetFileName($(ImagePath)))</ImageFileName>
+    <ImageName>$([System.IO.Path]::GetFileNameWithoutExtension($(ImagePath)))</ImageName>
+
+    <TargetPath     Condition="'$(OutputFile)'!=''">$([System.IO.Path]::Combine($(ProjectDir),$(OutputFile)))</TargetPath>
+    <TargetFileName Condition="'$(OutputFile)'!=''">$([System.IO.Path]::GetFileName($(OutputFile)))</TargetFileName>
+    <TargetName     Condition="'$(OutputFile)'!=''">$([System.IO.Path]::GetFileNameWithoutExtension($(OutputFile)))</TargetName>
+    <TargetExt      Condition="'$(OutputFile)'!=''">$([System.IO.Path]::GetExtension($(OutputFile)))</TargetExt>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ConfigurationType)' == 'Makefile'">
+    <TargetPath     Condition="'$(NMakeOutput)'!=''">$([System.IO.Path]::Combine($(ProjectDir),$(NMakeOutput)))</TargetPath>
+    <TargetFileName Condition="'$(NMakeOutput)'!=''">$([System.IO.Path]::GetFileName($(NMakeOutput)))</TargetFileName>
+    <TargetName     Condition="'$(NMakeOutput)'!=''">$([System.IO.Path]::GetFileNameWithoutExtension($(NMakeOutput)))</TargetName>
+    <TargetExt      Condition="'$(NMakeOutput)'!=''">$([System.IO.Path]::GetExtension($(NMakeOutput)))</TargetExt>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RemotePath Condition="'$(RemotePath)'=='%24(RemoteRoot)\%24(TargetFileName)'">$(RemoteRoot)\$(TargetFileName)</RemotePath>
+    <RemotePath Condition="'$(RemotePath)'=='%24(RemoteRoot)\%24(ImageFileName)'">$(RemoteRoot)\$(ImageFileName)</RemotePath>
+    <RemotePath Condition="'$(RemotePath)'=='%24(RemoteRoot)\%24(TargetName)%24(TargetExt)'">$(RemoteRoot)\$(TargetName)$(TargetExt)</RemotePath>
+  </PropertyGroup>
+  
+  <!-- Build the Xenia disc image (XISO/GDFX) after the XEX is produced: stage the
+       title as default.xex plus any content folder, then pack with xdvdfs. Runs
+       for both toolsets (stock ImageXex runs after Link; the clang toolset's
+       ImageXex is a no-op that still fires after its Link packs the XEX). -->
+  <Target Name="RxdkBuildXeniaIso"
+          AfterTargets="ImageXex"
+          Condition="'$(RxdkXeniaPath)' != '' and '$(RxdkXeniaUseIso)' == 'true' and ('$(ConfigurationType)' == 'Application' or '$(ConfigurationType)' == 'DynamicLibrary')">
+    <Error Condition="'$(RxdkXdvdfsPath)' == '' or !Exists('$(RxdkXdvdfsPath)')"
+           Text="Xenia disc image: xdvdfs was not found. Set 'XDVDFS Tool' under Console Deployment -&gt; Xenia (Team-Resurgent/XDVDFS-TR)." />
+    <PropertyGroup>
+      <_XeniaStage>$(IntDir)xeniaiso\</_XeniaStage>
+    </PropertyGroup>
+    <RemoveDir Directories="$(_XeniaStage)" />
+    <MakeDir Directories="$(_XeniaStage)" />
+    <!-- The title boots from default.xex at the disc root. -->
+    <Copy SourceFiles="$(ImagePath)" DestinationFiles="$(_XeniaStage)default.xex" />
+    <ItemGroup>
+      <_XeniaDisc Include="$(RxdkXeniaDiscDir)\**\*"
+                  Condition="'$(RxdkXeniaDiscDir)' != '' and Exists('$(RxdkXeniaDiscDir)')" />
+    </ItemGroup>
+    <Copy Condition="'@(_XeniaDisc)' != ''"
+          SourceFiles="@(_XeniaDisc)"
+          DestinationFiles="@(_XeniaDisc->'$(_XeniaStage)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <MakeDir Directories="$(OutDir)" />
+    <Exec Command="&quot;$(RxdkXdvdfsPath)&quot; pack &quot;$(_XeniaStage.TrimEnd('\'))&quot; &quot;$(RxdkXeniaIsoPath)&quot;" />
+    <Message Importance="High" Text="Xenia disc image -&gt; $(RxdkXeniaIsoPath)" />
+  </Target>
+
+  <ItemGroup Condition="'$(ConfigurationType)' == 'Application' or '$(ConfigurationType)' == 'DynamicLibrary'">
+    <ImageXex Include="$(OutputFile)"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(ConfigurationType)' != 'Makefile'">
+    <Deploy Include="%(ImageXex.ImageXexOutput)"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(ConfigurationType)' == 'Makefile'">
+    <Deploy Include="$(NMakeOutput)"/>
+  </ItemGroup>
+
+  <!-- Console Deployment F5 / debugger flavor follow Deployment Type.
+       Prefer $(DeploymentType) (project property, default CopyToHardDrive).
+       Fall back to Deploy-item metadata, first token only — @(Deploy) can
+       list several items. -->
+  <PropertyGroup Condition="'$(ConfigurationType)' != 'Makefile' and '$(ConfigurationType)' != 'StaticLibrary'">
+    <!-- Disc-image output path + xdvdfs default ({app}\bin\xdvdfs.exe). -->
+    <RxdkXeniaIsoPath Condition="'$(RxdkXeniaIsoPath)' == ''">$(OutDir)$(TargetName).iso</RxdkXeniaIsoPath>
+    <RxdkXdvdfsPath Condition="'$(RxdkXdvdfsPath)' == '' and '$(RXDK_XDVDFS)' != ''">$(RXDK_XDVDFS)</RxdkXdvdfsPath>
+    <RxdkXdvdfsPath Condition="'$(RxdkXdvdfsPath)' == '' and '$(RxdkInstallDir)' != ''">$(RxdkInstallDir)bin\xdvdfs.exe</RxdkXdvdfsPath>
+    <!-- Host tools (imagexex, xbcp) live at {app}\bin\win32, not XdkPath\bin\win32. -->
+    <_RxdkToolRoot Condition="'$(_RxdkToolRoot)' == '' and '$(RxdkInstallDir)' != ''">$(RxdkInstallDir)</_RxdkToolRoot>
+    <_RxdkToolRoot Condition="'$(_RxdkToolRoot)' == ''">$(XDKInstallDir)</_RxdkToolRoot>
+    <_RxdkDt Condition="'$(_RxdkDt)' == ''">$(DeploymentType)</_RxdkDt>
+    <_RxdkDt Condition="'$(_RxdkDt)' == ''">@(Deploy->'%(DeploymentType)')</_RxdkDt>
+    <_RxdkDtSemi Condition="'$(_RxdkDt)' != ''">$(_RxdkDt.IndexOf(';'))</_RxdkDtSemi>
+    <_RxdkDt Condition="'$(_RxdkDtSemi)' != '' and $(_RxdkDtSemi) &gt;= 0">$(_RxdkDt.Substring(0, $(_RxdkDtSemi)))</_RxdkDt>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(_RxdkDt)' != ''">
+    <Deploy Update="@(Deploy)">
+      <DeploymentType>$(_RxdkDt)</DeploymentType>
+    </Deploy>
+  </ItemGroup>
+
+  <!-- Xenia: switch the debugger dropdown to Local Windows Debugger and point
+       it at the emulator. Copy to Hard Drive forces Xbox 360 Debugger. -->
+  <PropertyGroup Condition="'$(_RxdkDt)' == 'Xenia' and '$(RxdkXeniaPath)' != '' and '$(ConfigurationType)' != 'Makefile' and '$(ConfigurationType)' != 'StaticLibrary'">
+    <_RxdkXeniaHeadless Condition="'$(RxdkXeniaHeadless)' == 'true'"> --headless=true</_RxdkXeniaHeadless>
+    <_RxdkXeniaImage Condition="'$(RxdkXeniaUseIso)' == 'true'">$(RxdkXeniaIsoPath)</_RxdkXeniaImage>
+    <_RxdkXeniaImage Condition="'$(_RxdkXeniaImage)' == ''">$(ImagePath)</_RxdkXeniaImage>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>$(RxdkXeniaPath)</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>"$(_RxdkXeniaImage)"$(_RxdkXeniaHeadless) $(RxdkXeniaArgs)</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory Condition="'$(RxdkXeniaPath)' != ''">$([System.IO.Path]::GetDirectoryName('$(RxdkXeniaPath)'))</LocalDebuggerWorkingDirectory>
+    <!-- The WindowsLocalDebugger rule's engine selector is LocalDebuggerDebuggerType
+         (not DebuggerType). Force NativeOnly so VS launches xenia straight instead
+         of running "Auto" engine detection against the emulator + the PPC XEX, which
+         can wedge F5. (Ctrl+F5 / Start Without Debugging launches xenia with no host
+         debugger attached at all - the recommended way to just run the title.) -->
+    <LocalDebuggerDebuggerType Condition="'$(LocalDebuggerDebuggerType)' == ''">NativeOnly</LocalDebuggerDebuggerType>
+  </PropertyGroup>
+
+
+  <!-- *******************************************************************************************
+        CLCompile
+       ******************************************************************************************* -->
+
+  <Target Name="ClCompile"
+          Condition="'@(ClCompile)' != ''"
+          DependsOnTargets="SelectClCompile">
+
+    <ItemGroup>
+      <ClCompile>
+        <PREfast                      Condition="'%(ClCompile.EnablePREfast)' == 'true'">Disabled</PREfast>
+        <PrecompiledHeaderOutputFile  Condition="'%(ClCompile.PrecompiledHeader)' == 'NotUsing' or '%(ClCompile.PrecompiledHeader)' == ''"></PrecompiledHeaderOutputFile>
+        <PrecompiledHeaderFile        Condition="'%(ClCompile.PrecompiledHeader)' == 'NotUsing' or '%(ClCompile.PrecompiledHeader)' == ''"></PrecompiledHeaderFile>
+        <AssemblerListingLocation     Condition="'%(ClCompile.AssemblerOutput)' == 'NoListing' or '%(ClCompile.AssemblerOutput)' == ''"></AssemblerListingLocation>
+        <CompileAs                    Condition="'%(ClCompile.CompileAs)' == 'Default' and '%(ClCompile.Extension)' == '.c'">CompileAsC</CompileAs>
+        <CompileAs                    Condition="'%(ClCompile.CompileAs)' == 'Default' and '%(ClCompile.Extension)' != '.c'">CompileAsCpp</CompileAs>
+        <MinimalRebuildFromTracking   Condition="'%(ClCompile.MinimalRebuildFromTracking)' == '' and '$(BuildType)' == 'Build' and '$(ForceRebuild)' != 'true'">true</MinimalRebuildFromTracking>
+      </ClCompile>
+    </ItemGroup>
+
+    <Delete Condition="'%(ClCompile.DebugInformationFormat)' != '' and '%(ClCompile.ProgramDataBaseFileName)' != '' and !Exists(%(ClCompile.ProgramDataBaseFileName))"
+            Files="%(ClCompile.PrecompiledHeaderOutputFile)" />
+
+    <PropertyGroup>
+        <_ClCompileAnalyzeOnly Condition="'%(ClCompile.PREfast)' == 'AnalyzeOnly'">true</_ClCompileAnalyzeOnly>
+    </PropertyGroup>
+
+    <!-- Precompiled headers - need to build them first -->
+    <Xbox360CL Condition="'%(ClCompile.PrecompiledHeader)' == 'Create' and '%(ClCompile.ExcludedFromBuild)'!='true'"
+        Sources                            ="@(ClCompile)"
+
+        AdditionalIncludeDirectories       ="%(ClCompile.AdditionalIncludeDirectories)"
+        AdditionalOptions                  ="%(ClCompile.AdditionalOptions)"
+        AdditionalUsingDirectories         ="%(ClCompile.AdditionalUsingDirectories)"
+        AssemblerListingLocation           ="%(ClCompile.AssemblerListingLocation)"
+        AssemblerOutput                    ="%(ClCompile.AssemblerOutput)"
+        BasicRuntimeChecks                 ="%(ClCompile.BasicRuntimeChecks)"
+        BrowseInformation                  ="%(ClCompile.BrowseInformation)"
+        BrowseInformationFile              ="%(ClCompile.BrowseInformationFile)"
+        BufferSecurityCheck                ="%(ClCompile.BufferSecurityCheck)"
+        CallingConvention                  ="%(ClCompile.CallingConvention)"
+        CompileAsManaged                   ="%(ClCompile.CompileAsManaged)"
+        CompileAs                          ="%(ClCompile.CompileAs)"
+        DebugInformationFormat             ="%(ClCompile.DebugInformationFormat)"
+        DisableLanguageExtensions          ="%(ClCompile.DisableLanguageExtensions)"
+        DisableSpecificWarnings            ="%(ClCompile.DisableSpecificWarnings)"
+        EnableEnhancedInstructionSet       ="%(ClCompile.EnableEnhancedInstructionSet)"
+        EnableFiberSafeOptimizations       ="%(ClCompile.EnableFiberSafeOptimizations)"
+        EnablePREfast                      ="%(ClCompile.EnablePREfast)"
+        ErrorReporting                     ="%(ClCompile.ErrorReporting)"
+        ExceptionHandling                  ="%(ClCompile.ExceptionHandling)"
+        ExcludedInputPaths                 ="$(ExcludePath)"
+        ExpandAttributedSource             ="%(ClCompile.ExpandAttributedSource)"
+        FavorSizeOrSpeed                   ="%(ClCompile.FavorSizeOrSpeed)"
+        FloatingPointExceptions            ="%(ClCompile.FloatingPointExceptions)"
+        FloatingPointModel                 ="%(ClCompile.FloatingPointModel)"
+        ForceConformanceInForLoopScope     ="%(ClCompile.ForceConformanceInForLoopScope)"
+        ForcedIncludeFiles                 ="%(ClCompile.ForcedIncludeFiles)"
+        ForcedUsingFiles                   ="%(ClCompile.ForcedUsingFiles)"
+        FunctionLevelLinking               ="%(ClCompile.FunctionLevelLinking)"
+        GenerateXMLDocumentationFiles      ="%(ClCompile.GenerateXMLDocumentationFiles)"
+        IgnoreStandardIncludePath          ="%(ClCompile.IgnoreStandardIncludePath)"
+        InlineFunctionExpansion            ="%(ClCompile.InlineFunctionExpansion)"
+        IntrinsicFunctions                 ="%(ClCompile.IntrinsicFunctions)"
+        MinimalRebuild                     ="%(ClCompile.MinimalRebuild)"
+        MultiProcessorCompilation          ="%(ClCompile.MultiProcessorCompilation)"
+        ObjectFileName                     ="%(ClCompile.ObjectFileName)"
+        OmitDefaultLibName                 ="%(ClCompile.OmitDefaultLibName)"
+        OmitFramePointers                  ="%(ClCompile.OmitFramePointers)"
+        OpenMPSupport                      ="%(ClCompile.OpenMPSupport)"
+        Optimization                       ="%(ClCompile.Optimization)"
+        PrecompiledHeader                  ="%(ClCompile.PrecompiledHeader)"
+        PrecompiledHeaderFile              ="%(ClCompile.PrecompiledHeaderFile)"
+        PrecompiledHeaderOutputFile        ="%(ClCompile.PrecompiledHeaderOutputFile)"
+        PreprocessKeepComments             ="%(ClCompile.PreprocessKeepComments)"
+        PreprocessorDefinitions            ="%(ClCompile.PreprocessorDefinitions)"
+        PreprocessSuppressLineNumbers      ="%(ClCompile.PreprocessSuppressLineNumbers)"
+        PreprocessToFile                   ="%(ClCompile.PreprocessToFile)"
+        ProcessorNumber                    ="%(ClCompile.ProcessorNumber)"
+        ProgramDataBaseFileName            ="%(ClCompile.ProgramDataBaseFileName)"
+        RuntimeLibrary                     ="%(ClCompile.RuntimeLibrary)"
+        RuntimeTypeInfo                    ="%(ClCompile.RuntimeTypeInfo)"
+        ShowIncludes                       ="%(ClCompile.ShowIncludes)"
+        SmallerTypeCheck                   ="%(ClCompile.SmallerTypeCheck)"
+        StringPooling                      ="%(ClCompile.StringPooling)"
+        StructMemberAlignment              ="%(ClCompile.StructMemberAlignment)"
+        SuppressStartupBanner              ="%(ClCompile.SuppressStartupBanner)"
+        TreatSpecificWarningsAsErrors      ="%(ClCompile.TreatSpecificWarningsAsErrors)"
+        TreatWarningAsError                ="%(ClCompile.TreatWarningAsError)"
+        TreatWChar_tAsBuiltInType          ="%(ClCompile.TreatWChar_tAsBuiltInType)"
+        UndefineAllPreprocessorDefinitions ="%(ClCompile.UndefineAllPreprocessorDefinitions)"
+        UndefinePreprocessorDefinitions    ="%(ClCompile.UndefinePreprocessorDefinitions)"
+        UseFullPaths                       ="%(ClCompile.UseFullPaths)"
+        UseUnicodeForAssemblerListing      ="%(ClCompile.UseUnicodeForAssemblerListing)"
+        WarningLevel                       ="%(ClCompile.WarningLevel)"
+        WholeProgramOptimization           ="%(ClCompile.WholeProgramOptimization)"
+        XMLDocumentationFileName           ="%(ClCompile.XMLDocumentationFileName)"
+        CreateHotpatchableImage            ="%(CLCompile.CreateHotpatchableImage)"
+
+        TrackerLogDirectory                ="%(ClCompile.TrackerLogDirectory)"
+
+        TLogReadFiles                      ="@(CLTLogReadFiles)"
+        TLogWriteFiles                     ="@(CLTLogWriteFiles)"
+        ToolExe                            ="$(CLToolExe)"
+        ToolPath                           ="$(CLToolPath)"
+        TrackFileAccess                    ="$(TrackFileAccess)"
+        MinimalRebuildFromTracking         ="%(ClCompile.MinimalRebuildFromTracking)"
+
+        AcceptableNonZeroExitCodes         ="%(ClCompile.AcceptableNonZeroExitCodes)"
+        
+        RegisterReservation                ="%(ClCompile.RegisterReservation)"
+        TrapIntegerDividesOptimization     ="%(ClCompile.TrapIntegerDividesOptimization)"
+        PreschedulingOptimization          ="%(ClCompile.PreschedulingOptimization)"
+        InlineAssemblyOptimization         ="%(ClCompile.InlineAssemblyOptimization)"
+        AnalyzeStalls                      ="%(ClCompile.AnalyzeStalls)"
+        CallAttributedProfiling            ="%(ClCompile.CallAttributedProfiling)"
+        PREfast                            ="%(ClCompile.PREfast)"
+        DeduceVariableType                 ="%(ClCompile.DeduceVariableType)"
+    >
+    </Xbox360CL>
+
+    <!-- Rest of the sources -->
+    <Xbox360CL Condition="'%(ClCompile.PrecompiledHeader)' != 'Create' and '%(ClCompile.ExcludedFromBuild)'!='true'"
+        Sources                            ="@(ClCompile)"
+
+        AdditionalIncludeDirectories       ="%(ClCompile.AdditionalIncludeDirectories)"
+        AdditionalOptions                  ="%(ClCompile.AdditionalOptions)"
+        AdditionalUsingDirectories         ="%(ClCompile.AdditionalUsingDirectories)"
+        AssemblerListingLocation           ="%(ClCompile.AssemblerListingLocation)"
+        AssemblerOutput                    ="%(ClCompile.AssemblerOutput)"
+        BasicRuntimeChecks                 ="%(ClCompile.BasicRuntimeChecks)"
+        BrowseInformation                  ="%(ClCompile.BrowseInformation)"
+        BrowseInformationFile              ="%(ClCompile.BrowseInformationFile)"
+        BufferSecurityCheck                ="%(ClCompile.BufferSecurityCheck)"
+        CallingConvention                  ="%(ClCompile.CallingConvention)"
+        CompileAsManaged                   ="%(ClCompile.CompileAsManaged)"
+        CompileAs                          ="%(ClCompile.CompileAs)"
+        DebugInformationFormat             ="%(ClCompile.DebugInformationFormat)"
+        DisableLanguageExtensions          ="%(ClCompile.DisableLanguageExtensions)"
+        DisableSpecificWarnings            ="%(ClCompile.DisableSpecificWarnings)"
+        EnableEnhancedInstructionSet       ="%(ClCompile.EnableEnhancedInstructionSet)"
+        EnableFiberSafeOptimizations       ="%(ClCompile.EnableFiberSafeOptimizations)"
+        EnablePREfast                      ="%(ClCompile.EnablePREfast)"
+        ErrorReporting                     ="%(ClCompile.ErrorReporting)"
+        ExceptionHandling                  ="%(ClCompile.ExceptionHandling)"
+        ExcludedInputPaths                 ="$(ExcludePath)"
+        ExpandAttributedSource             ="%(ClCompile.ExpandAttributedSource)"
+        FavorSizeOrSpeed                   ="%(ClCompile.FavorSizeOrSpeed)"
+        FloatingPointExceptions            ="%(ClCompile.FloatingPointExceptions)"
+        FloatingPointModel                 ="%(ClCompile.FloatingPointModel)"
+        ForceConformanceInForLoopScope     ="%(ClCompile.ForceConformanceInForLoopScope)"
+        ForcedIncludeFiles                 ="%(ClCompile.ForcedIncludeFiles)"
+        ForcedUsingFiles                   ="%(ClCompile.ForcedUsingFiles)"
+        FunctionLevelLinking               ="%(ClCompile.FunctionLevelLinking)"
+        GenerateXMLDocumentationFiles      ="%(ClCompile.GenerateXMLDocumentationFiles)"
+        IgnoreStandardIncludePath          ="%(ClCompile.IgnoreStandardIncludePath)"
+        InlineFunctionExpansion            ="%(ClCompile.InlineFunctionExpansion)"
+        IntrinsicFunctions                 ="%(ClCompile.IntrinsicFunctions)"
+        MinimalRebuild                     ="%(ClCompile.MinimalRebuild)"
+        MultiProcessorCompilation          ="%(ClCompile.MultiProcessorCompilation)"
+        ObjectFileName                     ="%(ClCompile.ObjectFileName)"
+        OmitDefaultLibName                 ="%(ClCompile.OmitDefaultLibName)"
+        OmitFramePointers                  ="%(ClCompile.OmitFramePointers)"
+        OpenMPSupport                      ="%(ClCompile.OpenMPSupport)"
+        Optimization                       ="%(ClCompile.Optimization)"
+        PrecompiledHeader                  ="%(ClCompile.PrecompiledHeader)"
+        PrecompiledHeaderFile              ="%(ClCompile.PrecompiledHeaderFile)"
+        PrecompiledHeaderOutputFile        ="%(ClCompile.PrecompiledHeaderOutputFile)"
+        PreprocessKeepComments             ="%(ClCompile.PreprocessKeepComments)"
+        PreprocessorDefinitions            ="%(ClCompile.PreprocessorDefinitions)"
+        PreprocessSuppressLineNumbers      ="%(ClCompile.PreprocessSuppressLineNumbers)"
+        PreprocessToFile                   ="%(ClCompile.PreprocessToFile)"
+        ProcessorNumber                    ="%(ClCompile.ProcessorNumber)"
+        ProgramDataBaseFileName            ="%(ClCompile.ProgramDataBaseFileName)"
+        RuntimeLibrary                     ="%(ClCompile.RuntimeLibrary)"
+        RuntimeTypeInfo                    ="%(ClCompile.RuntimeTypeInfo)"
+        ShowIncludes                       ="%(ClCompile.ShowIncludes)"
+        SmallerTypeCheck                   ="%(ClCompile.SmallerTypeCheck)"
+        StringPooling                      ="%(ClCompile.StringPooling)"
+        StructMemberAlignment              ="%(ClCompile.StructMemberAlignment)"
+        SuppressStartupBanner              ="%(ClCompile.SuppressStartupBanner)"
+        TreatSpecificWarningsAsErrors      ="%(ClCompile.TreatSpecificWarningsAsErrors)"
+        TreatWarningAsError                ="%(ClCompile.TreatWarningAsError)"
+        TreatWChar_tAsBuiltInType          ="%(ClCompile.TreatWChar_tAsBuiltInType)"
+        UndefineAllPreprocessorDefinitions ="%(ClCompile.UndefineAllPreprocessorDefinitions)"
+        UndefinePreprocessorDefinitions    ="%(ClCompile.UndefinePreprocessorDefinitions)"
+        UseFullPaths                       ="%(ClCompile.UseFullPaths)"
+        UseUnicodeForAssemblerListing      ="%(ClCompile.UseUnicodeForAssemblerListing)"
+        WarningLevel                       ="%(ClCompile.WarningLevel)"
+        WholeProgramOptimization           ="%(ClCompile.WholeProgramOptimization)"
+        XMLDocumentationFileName           ="%(ClCompile.XMLDocumentationFileName)"
+        CreateHotpatchableImage            ="%(CLCompile.CreateHotpatchableImage)"
+
+        TrackerLogDirectory                ="%(ClCompile.TrackerLogDirectory)"
+
+        TLogReadFiles                      ="@(CLTLogReadFiles)"
+        TLogWriteFiles                     ="@(CLTLogWriteFiles)"
+        ToolExe                            ="$(CLToolExe)"
+        ToolPath                           ="$(CLToolPath)"
+        TrackFileAccess                    ="$(TrackFileAccess)"
+        MinimalRebuildFromTracking         ="%(ClCompile.MinimalRebuildFromTracking)"
+
+        AcceptableNonZeroExitCodes         ="%(ClCompile.AcceptableNonZeroExitCodes)"
+                
+        RegisterReservation                ="%(ClCompile.RegisterReservation)"
+        TrapIntegerDividesOptimization     ="%(ClCompile.TrapIntegerDividesOptimization)"
+        PreschedulingOptimization          ="%(ClCompile.PreschedulingOptimization)"
+        InlineAssemblyOptimization         ="%(ClCompile.InlineAssemblyOptimization)"
+        AnalyzeStalls                      ="%(ClCompile.AnalyzeStalls)"
+        CallAttributedProfiling            ="%(ClCompile.CallAttributedProfiling)"
+        PREfast                            ="%(ClCompile.PREfast)"
+        DeduceVariableType                 ="%(ClCompile.DeduceVariableType)"
+    >
+    </Xbox360CL>
+
+  </Target>
+
+  <!-- *******************************************************************************************
+        Link
+       ******************************************************************************************* -->
+
+  <Target Name="Link"
+          Condition="'@(Link)' != '' and '$(_ClCompileAnalyzeOnly)' != 'true'"
+          DependsOnTargets="ComputeLinkSwitches">
+
+    <ItemGroup>
+      <_EmbedManagedResourceFile Include="@(Link->Metadata('EmbedManagedResourceFile')->Distinct())" />
+      <_EmbedManagedResourceFile Include="@(Link->Metadata('AddModuleNamesToAssembly')->Distinct())" />
+      <Link>
+          <ProfileGuidedDatabase Condition="'%(Link.LinkTimeCodeGeneration)' != 'PGInstrument' and '%(Link.LinkTimeCodeGeneration)' != 'PGOptimization'"></ProfileGuidedDatabase>
+          <StackReserveSize      Condition="'%(Link.StackCommitSize)'        != ''">%(Link.StackCommitSize)</StackReserveSize>
+      </Link>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <Link_MinimalRebuildFromTracking Condition="'@(Link->AnyHaveMetadataValue('MinimalRebuildFromTracking', 'false'))' == 'true'">false</Link_MinimalRebuildFromTracking>
+      <Link_MinimalRebuildFromTracking Condition="'$(Link_MinimalRebuildFromTracking)' != 'false' and '$(BuildType)' == 'Build' and '$(ForceRebuild)' != 'true'" >true</Link_MinimalRebuildFromTracking>
+    </PropertyGroup>
+
+    <Xbox360Link
+        Sources                        ="@(Link)"
+
+        AdditionalDependencies         ="%(Link.AdditionalDependencies)"
+        AdditionalLibraryDirectories   ="%(Link.AdditionalLibraryDirectories)"
+        AdditionalManifestDependencies ="%(Link.AdditionalManifestDependencies)"
+        AdditionalOptions              ="%(Link.AdditionalOptions)"
+        AddModuleNamesToAssembly       ="%(Link.AddModuleNamesToAssembly)"
+        AllowIsolation                 ="%(Link.AllowIsolation)"
+        AssemblyDebug                  ="%(Link.AssemblyDebug)"
+        AssemblyLinkResource           ="%(Link.AssemblyLinkResource)"
+        BaseAddress                    ="%(Link.BaseAddress)"
+        CLRImageType                   ="%(Link.CLRImageType)"
+        CLRSupportLastError            ="%(Link.CLRSupportLastError)"
+        CLRThreadAttribute             ="%(Link.CLRThreadAttribute)"
+        CLRUnmanagedCodeCheck          ="%(Link.CLRUnmanagedCodeCheck)"
+        CreateHotPatchableImage        ="%(Link.CreateHotPatchableImage)"
+        DataExecutionPrevention        ="%(Link.DataExecutionPrevention)"
+        DelayLoadDLLs                  ="%(Link.DelayLoadDLLs)"
+        DelaySign                      ="%(Link.DelaySign)"
+        Driver                         ="%(Link.Driver)"
+        EmbedManagedResourceFile       ="@(_EmbedManagedResourceFile)"
+        EnableCOMDATFolding            ="%(Link.EnableCOMDATFolding)"
+        EnableUAC                      ="%(Link.EnableUAC)"
+        EntryPointSymbol               ="%(Link.EntryPointSymbol)"
+        LinkErrorReporting             ="%(Link.LinkErrorReporting)"
+        FixedBaseAddress               ="%(Link.FixedBaseAddress)"
+        ForceFileOutput                ="%(Link.ForceFileOutput)"
+        ForceSymbolReferences          ="%(Link.ForceSymbolReferences)"
+        FunctionOrder                  ="%(Link.FunctionOrder)"
+        GenerateDebugInformation       ="%(Link.GenerateDebugInformation)"
+        GenerateManifest               ="%(Link.GenerateManifest)"
+        GenerateMapFile                ="%(Link.GenerateMapFile)"
+        HeapCommitSize                 ="%(Link.HeapCommitSize)"
+        HeapReserveSize                ="%(Link.HeapReserveSize)"
+        IgnoreAllDefaultLibraries      ="%(Link.IgnoreAllDefaultLibraries)"
+        IgnoreEmbeddedIDL              ="%(Link.IgnoreEmbeddedIDL)"
+        IgnoreSpecificDefaultLibraries ="%(Link.IgnoreSpecificDefaultLibraries)"
+        ImageHasSafeExceptionHandlers  ="%(Link.ImageHasSafeExceptionHandlers)"
+        ImportLibrary                  ="%(Link.ImportLibrary)"
+        KeyContainer                   ="%(Link.KeyContainer)"
+        KeyFile                        ="%(Link.KeyFile)"
+        LargeAddressAware              ="%(Link.LargeAddressAware)"
+        LinkDLL                        ="%(Link.LinkDLL)"
+        LinkIncremental                ="$(LinkIncremental)"
+        LinkStatus                     ="%(Link.LinkStatus)"
+        LinkTimeCodeGeneration         ="%(Link.LinkTimeCodeGeneration)"
+        ManifestFile                   ="%(Link.ManifestFile)"
+        MapExports                     ="%(Link.MapExports)"
+        MapFileName                    ="%(Link.MapFileName)"
+        MergedIDLBaseFileName          ="%(Link.MergedIDLBaseFileName)"
+        MergeSections                  ="%(Link.MergeSections)"
+        MidlCommandFile                ="%(Link.MidlCommandFile)"
+        MinimumRequiredVersion         ="%(Link.MinimumRequiredVersion)"
+        ModuleDefinitionFile           ="%(Link.ModuleDefinitionFile)"
+        MSDOSStubFileName              ="%(Link.MSDOSStubFileName)"
+        OptimizeReferences             ="%(Link.OptimizeReferences)"
+        OutputFile                     ="%(Link.OutputFile)"
+        PreventDllBinding              ="%(Link.PreventDllBinding)"
+        Profile                        ="%(Link.Profile)"
+        ProfileGuidedDatabase          ="%(Link.ProfileGuidedDatabase)"
+        ProgramDatabaseFile            ="%(Link.ProgramDatabaseFile)"
+        RandomizedBaseAddress          ="%(Link.RandomizedBaseAddress)"
+        NoEntryPoint                   ="%(Link.NoEntryPoint)"
+        SectionAlignment               ="%(Link.SectionAlignment)"
+        SetChecksum                    ="%(Link.SetChecksum)"
+        ShowProgress                   ="%(Link.ShowProgress)"
+        SpecifySectionAttributes       ="%(Link.SpecifySectionAttributes)"
+        StackCommitSize                ="%(Link.StackCommitSize)"
+        StackReserveSize               ="%(Link.StackReserveSize)"
+        StripPrivateSymbols            ="%(Link.StripPrivateSymbols)"
+        SubSystem                      ="%(Link.SubSystem)"
+        SupportUnloadOfDelayLoadedDLL  ="%(Link.SupportUnloadOfDelayLoadedDLL)"
+        SupportNobindOfDelayLoadedDLL  ="%(Link.SupportNobindOfDelayLoadedDLL)"
+        SuppressStartupBanner          ="%(Link.SuppressStartupBanner)"
+        SwapRunFromCD                  ="%(Link.SwapRunFromCD)"
+        SwapRunFromNET                 ="%(Link.SwapRunFromNET)"
+        TargetMachine                  ="%(Link.TargetMachine)"
+        TerminalServerAware            ="%(Link.TerminalServerAware)"
+        TreatLinkerWarningAsErrors     ="%(Link.TreatLinkerWarningAsErrors)"
+        TurnOffAssemblyGeneration      ="%(Link.TurnOffAssemblyGeneration)"
+        TypeLibraryFile                ="%(Link.TypeLibraryFile)"
+        TypeLibraryResourceID          ="%(Link.TypeLibraryResourceID)"
+        UACExecutionLevel              ="%(Link.UACExecutionLevel)"
+        UACUIAccess                    ="%(Link.UACUIAccess)"
+        Version                        ="%(Link.Version)"
+
+        TrackerLogDirectory            ="%(Link.TrackerLogDirectory)"
+
+        TLogReadFiles                  ="@(LinkTLogReadFiles)"
+        TLogWriteFiles                 ="@(LinkTLogWriteFiles)"
+        ToolExe                        ="$(LinkToolExe)"
+        ToolPath                       ="$(LinkToolPath)"
+        TrackFileAccess                ="$(TrackFileAccess)"
+        MinimalRebuildFromTracking     ="$(Link_MinimalRebuildFromTracking)"
+
+        AcceptableNonZeroExitCodes     ="%(Link.AcceptableNonZeroExitCodes)"
+    >
+      <Output TaskParameter="SkippedExecution" PropertyName="LinkSkippedExecution" />
+    </Xbox360Link>
+    
+  </Target>
+
+  <!-- *******************************************************************************************
+        Lib
+       ******************************************************************************************* -->
+
+  <Target Name="Lib"
+          Condition="'@(Lib)' != '' and '$(_ClCompileAnalyzeOnly)' != 'true'"
+          DependsOnTargets="$(ComputeLibInputsTargets)">
+    <ItemGroup>
+      <Lib>
+        <MinimalRebuildFromTracking Condition="'$(BuildType)' != 'Build' or '$(ForceRebuild)' == 'true'">false</MinimalRebuildFromTracking>
+      </Lib>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <LibToolArchitecture Condition="'$(LibToolArchitecture)' == ''">$(DefaultToolArchitecture)</LibToolArchitecture>
+    </PropertyGroup>
+
+    <LIB
+      Sources                         ="@(Lib)"
+
+      AdditionalDependencies          ="%(Lib.AdditionalDependencies)"
+      AdditionalLibraryDirectories    ="%(Lib.AdditionalLibraryDirectories)"
+      AdditionalOptions               ="$(LibAdditionalOptions)"
+      DisplayLibrary                  ="%(Lib.DisplayLibrary)"
+      ErrorReporting                  ="%(Lib.LinkErrorReporting)"
+      ExportNamedFunctions            ="%(Lib.ExportNamedFunctions)"
+      ForceSymbolReferences           ="%(Lib.ForceSymbolReferences)"
+      IgnoreAllDefaultLibraries       ="%(Lib.IgnoreAllDefaultLibraries)"
+      IgnoreSpecificDefaultLibraries  ="%(Lib.IgnoreSpecificDefaultLibraries)"
+      LinkTimeCodeGeneration          ="%(Lib.LinkTimeCodeGeneration)"
+      ModuleDefinitionFile            ="%(Lib.ModuleDefinitionFile)"
+      Name                            ="%(Lib.Name)"
+      OutputFile                      ="%(Lib.OutputFile)"
+      RemoveObjects                   ="%(Lib.RemoveObjects)"
+      SubSystem                       ="%(Lib.SubSystem)"
+      SuppressStartupBanner           ="%(Lib.SuppressStartupBanner)"
+      TargetMachine                   ="%(Lib.TargetMachine)"
+      TreatLibWarningAsErrors         ="%(Lib.TreatLibWarningAsErrors)"
+      Verbose                         ="%(Lib.Verbose)"
+
+      TrackerLogDirectory             ="%(Lib.TrackerLogDirectory)"
+
+      TLogReadFiles                   ="@(LIBTLogReadFiles)"
+      TLogWriteFiles                  ="@(LIBTLogWriteFiles)"
+      ToolExe                         ="$(LIBToolExe)"
+      ToolPath                        ="$(LIBToolPath)"
+      TrackFileAccess                 ="$(TrackFileAccess)"
+      MinimalRebuildFromTracking      ="%(Lib.MinimalRebuildFromTracking)"
+      ToolArchitecture                ="$(LibToolArchitecture)"
+      TrackerFrameworkPath            ="$(LibTrackerFrameworkPath)"
+      TrackerSdkPath                  ="$(LibTrackerSdkPath)"
+
+      AcceptableNonZeroExitCodes      ="%(Lib.AcceptableNonZeroExitCodes)"
+      >
+    </LIB>
+
+    <Message Text="$(MSBuildProjectFile) -&gt; $(TargetPath)" Importance="High" />
+  </Target>
+
+  <!-- *******************************************************************************************
+        ImageXex
+       ******************************************************************************************* -->
+
+  <Target Name="ImageXex"
+          AfterTargets="Link"
+          Condition="'@(ImageXex)' != '' and ('$(ConfigurationType)' == 'Application' or '$(ConfigurationType)' == 'DynamicLibrary') and '$(_ClCompileAnalyzeOnly)' != 'true'"
+          Inputs="@(ImageXex->'%(InputFile)')"
+          Outputs="@(ImageXex->'%(ImageXexOutput)')">
+
+    <ImageXex
+        InputFile               ="%(ImageXex.InputFile)"
+        OutputFile              ="%(ImageXex.ImageXexOutput)"
+        TitleID                 ="%(ImageXex.TitleID)"
+        LanKey                  ="%(ImageXex.LanKey)"
+        BaseAddress             ="%(ImageXex.BaseAddress)"
+        HeapSize                ="%(ImageXex.HeapSize)"
+        WorkspaceSize           ="%(ImageXex.WorkspaceSize)"
+        AdditionalSections      ="%(ImageXex.AdditionalSections)"
+        ExportByName            ="%(ImageXex.ExportByName)"
+        OpticalDiscDriveMapping ="%(ImageXex.OpticalDiscDriveMapping)"
+        Pal50Incompatible       ="%(ImageXex.Pal50Incompatible)"
+        MultiDiscTitle          ="%(ImageXex.MultiDiscTitle)"
+        PreferBigButtonInput    ="%(ImageXex.PreferBigButtonInput)"
+        CrossPlatformSystemLink ="%(ImageXex.CrossPlatformSystemLink)"
+        AllowAvatarGetMetadata  ="%(ImageXex.AllowAvatarGetMetadata)"
+        AllowControllerSwapping ="%(ImageXex.AllowControllerSwapping)"
+        RequireFullExperience   ="%(ImageXex.RequireFullExperience)"
+        GameVoiceRequiredUI     ="%(ImageXex.GameVoiceRequiredUI)"
+        KinectElevationControl  ="%(ImageXex.KinectElevationControl)"
+        KinectSupportLevel      ="%(ImageXex.KinectSupportLevel)"
+        ConfigurationFile       ="%(ImageXex.ConfigurationFile)"
+        XDKInstallDir           ="$(_RxdkToolRoot)"
+    />
+    
+  </Target>
+
+  <!-- *******************************************************************************************
+        Deploy
+       ******************************************************************************************* -->
+
+  <Target Name="Deploy"
+          AfterTargets="ImageXex"
+          Condition="'$(ConfigurationType)' != 'StaticLibrary' and '$(ConfigurationType)' != 'Makefile' and '$(_ClCompileAnalyzeOnly)' != 'true'"
+          DependsOnTargets="DeployToHardDrive;DeployEmulateDvd">
+  </Target>
+
+  <Target Name="DeployToHardDrive">
+
+    <DeployToHardDrive
+        Condition="'%(Deploy.DeploymentType)' == 'CopyToHardDrive' and '%(Deploy.ExcludedFromBuild)' != 'true' and '$(ConfigurationType)' != 'StaticLibrary'"
+        SuppressStartupBanner = "%(Deploy.SuppressStartupBanner)"
+        TargetConsole         = "%(Deploy.TargetConsole)"
+        Progress              = "%(Deploy.Progress)"
+        ForceCopy             = "%(Deploy.ForceCopy)"
+        DeploymentFiles       = "%(Deploy.DeploymentFiles)"
+        DeploymentRoot        = "%(Deploy.RemoteRoot)"
+        XDKInstallDir         = "$(_RxdkToolRoot)"
+        ProjectDir            = "$(ProjectDir)"
+        DefaultConsole        = "$(DefaultConsole)"
+    />
+
+  </Target>
+
+  <!-- Official XDK left Emulate DVD off the MSBuild Deploy target (VS 2010's
+       X360EmulationManager generated the .xgd at F5). Write the layout here so
+       Build produces a .xgd, then xbEmulate /Emulate start (USB sidecar). -->
+  <Target Name="DeployEmulateDvd">
+    <EmulateDvd
+        Condition="'%(Deploy.DeploymentType)' == 'EmulateDvd' and '%(Deploy.ExcludedFromBuild)' != 'true' and '$(ConfigurationType)' != 'StaticLibrary'"
+        DeploymentFiles       = "%(Deploy.DeploymentFiles)"
+        LayoutFile            = "%(Deploy.LayoutFile)"
+        DvdEmulationType      = "%(Deploy.DvdEmulationType)"
+        TargetConsole         = "%(Deploy.TargetConsole)"
+        DefaultConsole        = "$(DefaultConsole)"
+        OutputXgd             = "$(OutDir)$(TargetName).xgd"
+        StagingDir            = "$(IntDir)dvdlayout\"
+        ImagePath             = "$(ImagePath)"
+        ProjectDir            = "$(ProjectDir)"
+        XDKInstallDir         = "$(_RxdkToolRoot)"
+    />
+  </Target>
+
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\Microsoft.Makefile.Xbox 360.targets" Condition="'$(ConfigurationType)' == 'Makefile'"/>
+
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\PlatformToolsets\$(PlatformToolset)\Toolset.targets" />
+  <Import Project="$(VCTargetsPath)\Platforms\Xbox 360\ImportAfter\*.targets" Condition="Exists('$(VCTargetsPath)\Platforms\Xbox 360\ImportAfter')" />
+
+  <!-- After toolset imports so DebuggerFlavor actually updates the dropdown. -->
+  <PropertyGroup Condition="'$(_RxdkDt)' == 'Xenia' and '$(RxdkXeniaPath)' != ''">
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(_RxdkDt)' == 'CopyToHardDrive'">
+    <DebuggerFlavor>RxdkXbox360Debugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(_RxdkDt)' == 'EmulateDvd'">
+    <DebuggerFlavor>RxdkXbox360Debugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>
+

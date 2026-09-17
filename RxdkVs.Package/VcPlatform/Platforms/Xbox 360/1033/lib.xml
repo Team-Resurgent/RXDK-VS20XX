@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Rule Name="Xbox360LIB" PageTemplate="tool" SwitchPrefix="/" Order="40" xmlns="http://schemas.microsoft.com/build/2009/properties" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <Rule.DisplayName>
+    <sys:String>Librarian</sys:String>
+  </Rule.DisplayName>
+  <Rule.Categories>
+    <Category Name="General">
+      <Category.DisplayName>
+        <sys:String>General</sys:String>
+      </Category.DisplayName>
+    </Category>
+    <Category Name="Command Line" Subtype="CommandLine">
+      <Category.DisplayName>
+        <sys:String>Command Line</sys:String>
+      </Category.DisplayName>
+    </Category>
+  </Rule.Categories>
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" ItemType="Lib" Label="" HasConfigurationCondition="true" />
+  </Rule.DataSource>
+  <StringProperty Subtype="file" Name="OutputFile" Category="General" Switch="OUT" Separator=":" F1Keyword="VC.Project.VCLibrarianTool.OutputFile">
+    <StringProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" Label="" HasConfigurationCondition="true" />
+    </StringProperty.DataSource>
+    <StringProperty.DisplayName>
+      <sys:String>Output File</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /OUT option overrides the default name and location of the program that the lib creates.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringListProperty Subtype="file" Name="AdditionalDependencies" Category="General" F1Keyword="VC.Project.VCLibrarianTool.AdditionalDependencies">
+    <StringListProperty.DisplayName>
+      <sys:String>Additional Dependencies</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Specifies additional items to add to the link command line [i.e. kernel32.lib] </sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringListProperty Subtype="folder" Name="AdditionalLibraryDirectories" Category="General" Switch="LIBPATH:" F1Keyword="VC.Project.VCLibrarianTool.AdditionalLibraryDirectories">
+    <StringListProperty.DisplayName>
+      <sys:String>Additional Library Directories</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Allows the user to override the environmental library path</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <BoolProperty Name="SuppressStartupBanner" Category="General" Switch="NOLOGO" F1Keyword="VC.Project.VCLibrarianTool.SuppressStartupBanner">
+    <BoolProperty.DisplayName>
+      <sys:String>Suppress Startup Banner</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /NOLOGO option prevents display of the copyright message and version number. </sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringProperty Subtype="file" Name="ModuleDefinitionFile" Category="General" Switch="DEF" Separator=":" F1Keyword="VC.Project.VCLibrarianTool.ModuleDefinitionFile">
+    <StringProperty.DisplayName>
+      <sys:String>Module Definition File Name</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>The /DEF option passes a module-definition file (.def) to LIB. Only one .def file can be specified to LIB.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="IgnoreAllDefaultLibraries" Category="General" Switch="NODEFAULTLIB" F1Keyword="VC.Project.VCLibrarianTool.IgnoreAllDefaultLibraries">
+    <BoolProperty.DisplayName>
+      <sys:String>Ignore All Default Libraries</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>The /NODEFAULTLIB option tells the lib to remove one or more default libraries from the list of libraries it searches when resolving external references. </sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringListProperty Subtype="file" Name="IgnoreSpecificDefaultLibraries" Category="General" Switch="NODEFAULTLIB:" F1Keyword="VC.Project.VCLibrarianTool.IgnoreDefaultLibraryNames">
+    <StringListProperty.DisplayName>
+      <sys:String>Ignore Specific Default Libraries</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>A library that you want the lib to ignore when it resolves external references.</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringListProperty Name="ExportNamedFunctions" Category="General" Switch="EXPORT:" F1Keyword="VC.Project.VCLibrarianTool.ExportNamedFunctions">
+    <StringListProperty.DisplayName>
+      <sys:String>Export Named Functions</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Export one or more specified functions </sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <StringProperty Name="ForceSymbolReferences" Category="General" Switch="INCLUDE" Separator=":" F1Keyword="VC.Project.VCLibrarianTool.ForceSymbolReferences">
+    <StringProperty.DisplayName>
+      <sys:String>Force Symbol References</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Force Lib to include a reference to this symbol</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="UseUnicodeResponseFiles" Category="General" IncludeInCommandLine="false" F1Keyword="VC.Project.VCLibrarianTool.UseUnicodeResponseFiles">
+    <BoolProperty.DisplayName>
+      <sys:String>Use Unicode Response Files</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Use UNICODE Response Files : Instructs the project system to generate UNICODE response files when spawning the librarian.  Set this property to 'Yes' when files in the project have UNICODE paths.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <BoolProperty Name="LinkLibraryDependencies" Category="General" IncludeInCommandLine="false" F1Keyword="VC.Project.VCLibrarianTool.LinkLibraryDependencies">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="ProjectReference" Label="" HasConfigurationCondition="true" />
+    </BoolProperty.DataSource>
+    <BoolProperty.DisplayName>
+      <sys:String>Link Library Dependencies</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies whether or not library outputs from project dependencies are automatically linked in.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <EnumProperty Name="ErrorReporting" Category="General" Visible="false">
+    <EnumProperty.DisplayName>
+      <sys:String>Error Reporting</sys:String>
+    </EnumProperty.DisplayName>
+    <EnumProperty.Description>
+      <sys:String>Allows you to provide internal compiler error (ICE) information directly to Microsoft.</sys:String>
+    </EnumProperty.Description>
+    <EnumValue Name="PromptImmediately" Switch="ERRORREPORT:PROMPT">
+      <EnumValue.DisplayName>
+        <sys:String>PromptImmediately</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Prompt Immediately.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="QueueForNextLogin" Switch="ERRORREPORT:QUEUE">
+      <EnumValue.DisplayName>
+        <sys:String>Queue For Next Login</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Queue for next login.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="SendErrorReport" Switch="ERRORREPORT:SEND">
+      <EnumValue.DisplayName>
+        <sys:String>Send Error Report</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>Send error report.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+    <EnumValue Name="NoErrorReport" Switch="ERRORREPORT:NONE">
+      <EnumValue.DisplayName>
+        <sys:String>No Error Report</sys:String>
+      </EnumValue.DisplayName>
+      <EnumValue.Description>
+        <sys:String>No error report.</sys:String>
+      </EnumValue.Description>
+    </EnumValue>
+  </EnumProperty>
+  <StringProperty Name="DisplayLibrary" Category="General" Switch="LIST" Separator=":" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Display Library to standard output</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Displays information about the output library to standard output. The output can be redirected to a file. You can use /LIST to determine the contents of an existing library without modifying it.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty ReverseSwitch="WX:NO" Name="TreatLibWarningAsErrors" Category="General" Switch="WX"  Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Treat Lib Warning As Errors</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>/WX causes no output file to be generated if lib generates a warning.</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <!-- Xbox 360: Removed TargetMachine -->
+  <!-- Xbox 360: Removed SubSystem -->
+  <StringProperty Name="MinimumRequiredVersion" Category="General" Separator=","  Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Minimum Required Version</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Specify the minimum required version of the subsystem. The arguments are decimal numbers in the range 0 through 65,535.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringListProperty Subtype="file" Name="RemoveObjects" Category="General" Switch="REMOVE:" Visible="false">
+    <StringListProperty.DisplayName>
+      <sys:String>Remove Objects</sys:String>
+    </StringListProperty.DisplayName>
+    <StringListProperty.Description>
+      <sys:String>Omits the specified object from the output library. LIB creates an output library by combining all objects (whether in object files or libraries), and then deleting any objects specified with /REMOVE.</sys:String>
+    </StringListProperty.Description>
+  </StringListProperty>
+  <BoolProperty Name="Verbose" Category="General" Switch="VERBOSE" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Verbose</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Verbose</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringProperty Subtype="file" Name="Name" Category="General" Switch="NAME:" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Name</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>When building an import library, specifies the name of the DLL for which the import library is being built.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <BoolProperty Name="LinkTimeCodeGeneration" Category="General" Switch="LTCG" Visible="false">
+    <BoolProperty.DisplayName>
+      <sys:String>Link Time Code Generation</sys:String>
+    </BoolProperty.DisplayName>
+    <BoolProperty.Description>
+      <sys:String>Specifies link-time code generation</sys:String>
+    </BoolProperty.Description>
+  </BoolProperty>
+  <StringProperty Subtype="folder" Name="TrackerLogDirectory" Category="General" IncludeInCommandLine="false" Visible="false">
+    <StringProperty.DisplayName>
+      <sys:String>Tracker Log Directory</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Tracker log directory.</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+  <StringProperty Name="AdditionalOptions" Category="Command Line">
+    <StringProperty.DisplayName>
+      <sys:String>Additional Options</sys:String>
+    </StringProperty.DisplayName>
+    <StringProperty.Description>
+      <sys:String>Additional Options</sys:String>
+    </StringProperty.Description>
+  </StringProperty>
+</Rule>

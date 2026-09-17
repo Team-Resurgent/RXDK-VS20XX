@@ -1,0 +1,98 @@
+<!--
+***********************************************************************************************
+Microsoft.CppCommon.Xbox 360.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!-- *******************************************************************************************
+        Property pages
+        
+        This section is largely copied from Microsoft.CppCommon.targets, since we use
+        some (but not all) of the default property pages.
+       ******************************************************************************************* -->
+
+  <PropertyGroup>
+    <UseDefaultPropertyPageSchemas>false</UseDefaultPropertyPageSchemas>
+    <UseDefaultGeneralPropertyPageSchema>false</UseDefaultGeneralPropertyPageSchema>
+
+    <!-- Default to English of the $(LangID) directory is not present for the property pages. -->
+    <Xbox360PropertyPagesPath>$(VCTargetsPath)Platforms\Xbox 360\1033\</Xbox360PropertyPagesPath>
+    <Xbox360PropertyPagesPath Condition="'$(LangID)' != '' and Exists('$(VCTargetsPath)Platforms\Xbox 360\$(LangID)\')">$(VCTargetsPath)Platforms\Xbox 360\$(LangID)\</Xbox360PropertyPagesPath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- Property pages that always apply -->
+    <PropertyPageSchema Include="
+        $(VCTargetsPath)$(LangID)\ProjectItemsSchema.xml;
+        $(VCTargetsPath)$(LangID)\debugger_general.xml;
+        $(VCTargetsPath)$(LangID)\midl.xml;
+        $(VCTargetsPath)$(LangID)\custom_build_tool.xml;"/>
+
+    <!-- Property pages that depens on Makefile configuration type -->
+    <PropertyPageSchema Condition="'$(ConfigurationType)'!='Makefile'" Include="$(VCTargetsPath)$(LangID)\build_events.xml" />
+    <PropertyPageSchema Condition="'$(ConfigurationType)'=='Makefile'" Include="$(Xbox360PropertyPagesPath)nmake.xml" />
+
+    <!-- Xbox 360 Debugger property -->
+    <PropertyPageSchema Include="$(Xbox360PropertyPagesPath)debugger_remote.xml"/>
+
+    <!-- Local Windows Debugger flavor - the Xenia launch uses it (the Xenia
+         settings live on the Console Deployment page, deploy.xml). The stock
+         schema file is debugger_local_windows.xml; registering it is what lets VS
+         read our evaluated LocalDebuggerCommand ($(RxdkXeniaPath)) for F5 instead
+         of falling back to the built-in $(TargetPath) local-launch default. -->
+    <PropertyPageSchema Include="$(VCTargetsPath)$(LangID)\debugger_local_windows.xml"/>
+
+    <!-- Property sheet specific property pages -->
+    <PropertyPageSchema Include="$(VCTargetsPath)$(LangID)\usermacros.xml">
+      <Context>PropertySheet</Context>
+    </PropertyPageSchema>
+
+    <!-- Switch view between project property based directories and environment variables -->
+    <PropertyPageSchema Condition="'$(UseEnv)' != 'true'" Include="$(VCTargetsPath)$(LangID)\directories.xml" />
+    <PropertyPageSchema Condition="'$(UseEnv)' == 'true'" Include="$(VCTargetsPath)$(LangID)\envvars.xml" />
+
+    <PropertyPageSchema Include="
+        $(VCTargetsPath)$(LangID)\bscmake.xml;
+        $(VCTargetsPath)$(LangID)\custom_build_step.xml;
+        $(Xbox360PropertyPagesPath)lib.xml;
+        $(Xbox360PropertyPagesPath)link.xml;
+        $(Xbox360PropertyPagesPath)imagexex.xml;
+        $(Xbox360PropertyPagesPath)deploy.xml;
+    "/>
+
+    <PropertyPageSchema Condition="'$(ConfigurationType)'!='Makefile' and '$(ConfigurationType)'!='Utility'" Include="$(Xbox360PropertyPagesPath)cl.xml"/>
+
+    <!-- General properties for non Makefile configuration type -->
+    <PropertyPageSchema Condition="'$(ConfigurationType)'!='Makefile'" Include="$(Xbox360PropertyPagesPath)general.xml">
+      <Context>Project</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Condition="'$(ConfigurationType)'!='Makefile'" Include="$(Xbox360PropertyPagesPath)general_ps.xml">
+      <Context>PropertySheet</Context>
+    </PropertyPageSchema>
+
+    <!-- General properties for Makefile configuration type -->
+    <PropertyPageSchema Condition="'$(ConfigurationType)'=='Makefile'" Include="$(Xbox360PropertyPagesPath)general_makefile.xml">
+      <Context>Project</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Condition="'$(ConfigurationType)'=='Makefile'" Include="$(Xbox360PropertyPagesPath)general_makefile_ps.xml">
+      <Context>PropertySheet</Context>
+    </PropertyPageSchema>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseDefaultProjectTools)' != 'false' and '$(ConfigurationType)' != 'StaticLibrary'">
+    <ProjectTools Include="Deploy"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseDefaultProjectTools)' != 'false' and ('$(ConfigurationType)' == 'Application' or '$(ConfigurationType)' == 'DynamicLibrary')">
+    <ProjectTools Include="ImageXex"/>
+  </ItemGroup>
+
+</Project>

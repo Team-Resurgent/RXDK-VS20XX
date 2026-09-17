@@ -1142,20 +1142,22 @@ namespace RxdkVs.Package.Commands
                 buildToolsPending = true;
             }
 
-            // 2) The custom 'Xbox' MSBuild platform (copied into VCTargetsPath\Platforms\Xbox). Needs
-            //    the x64 platform (from the C++ tools) present, so only attempt it once those exist.
+            // 2) The custom 'Xbox' MSBuild platform + RXDK Application Type (copied into VCTargetsPath).
+            //    Needs the x64 platform (from the C++ tools) present, so only attempt it once those
+            //    exist. Always refresh when the tools ARE present, even if IsXboxPlatformCurrent()
+            //    reports the same version: a same-version VSIX (a dev rebuild, or a hotfix that keeps
+            //    the version) changes the toolset dll/props/targets without bumping the version, and
+            //    a stale VCTargetsPath copy would silently keep building with the old toolset. The
+            //    robocopy is cheap and idempotent, so re-running it every setup is harmless.
             var platformInstalled = false;
-            if (!IsXboxPlatformCurrent())
+            if (buildToolsPending)
             {
-                if (buildToolsPending)
-                {
-                    // can't install into VCTargetsPath until the C++ tools finish installing
-                }
-                else
-                {
-                    await InstallXboxPlatformAsync();
-                    platformInstalled = IsXboxPlatformCurrent();
-                }
+                // can't install into VCTargetsPath until the C++ tools finish installing
+            }
+            else
+            {
+                await InstallXboxPlatformAsync();
+                platformInstalled = IsXboxPlatformCurrent();
             }
 
             // 3) CLI-managed components: install only what's missing (won't re-fetch Zig etc.).

@@ -32,6 +32,7 @@ namespace RxdkVs.Package.Services
             public string XbeOutput;      // evaluated $(OutDir)$(TargetName)$(TargetExt)
             public string ConfigName;     // "Debug" / "Release"
             public bool IsXbox;           // Keyword/ApplicationType=RXDK (RxdkXbox as fallback)
+            public bool IsLaunchable;     // Application or DXT (a StaticLibrary is not deployable/runnable)
             public EnvDTE.Project Project; // for building via VS (generates the manifest)
             public string SolutionConfig; // active solution config name, e.g. "Debug"
         }
@@ -48,6 +49,7 @@ namespace RxdkVs.Package.Services
         {
             public bool IsXbox;      // Keyword/ApplicationType=RXDK (RxdkXbox as fallback)
             public bool IsDxt;       // ConfigurationType == DebuggerExtension
+            public bool IsLaunchable; // Application or DXT (a StaticLibrary is not deployable/runnable)
             public string Dir;       // project directory
             public string Name;      // $(TargetName)
             public string XbeOutput; // evaluated $(OutDir)$(TargetName)$(TargetExt)
@@ -92,6 +94,7 @@ namespace RxdkVs.Package.Services
                 {
                     IsXbox = facts.IsXbox,
                     IsDxt = facts.IsDxt,
+                    IsLaunchable = facts.IsLaunchable,
                     Dir = dir,
                     Name = facts.TargetName ?? Path.GetFileNameWithoutExtension(dir),
                     XbeOutput = facts.TargetPath ?? string.Empty,
@@ -118,6 +121,13 @@ namespace RxdkVs.Package.Services
             if (!TryGetSelectedProject(out var sel) || !sel.IsXbox)
             {
                 await ShowAsync(package, "Select an RXDK Xbox project in Solution Explorer, then try Deploy again.");
+                return;
+            }
+            if (!sel.IsLaunchable)
+            {
+                await ShowAsync(package,
+                    $"'{sel.Name}' is a static library — it builds a .lib, not a title, so there is nothing to deploy. " +
+                    "Select an Xbox application (or DXT) project.");
                 return;
             }
             if (string.IsNullOrEmpty(sel.XbeOutput))
@@ -172,6 +182,13 @@ namespace RxdkVs.Package.Services
             if (info == null || !info.IsXbox)
             {
                 await ShowAsync(package, "No Xbox project is set as the startup project.");
+                return;
+            }
+            if (!info.IsLaunchable)
+            {
+                await ShowAsync(package,
+                    $"'{info.Project?.Name}' is a static library — it builds a .lib, not a title, so it can't be " +
+                    "deployed or debugged. Set an Xbox application (or DXT) project as the startup project, then try again.");
                 return;
             }
             if (string.IsNullOrEmpty(info.XbeOutput))
@@ -321,7 +338,7 @@ namespace RxdkVs.Package.Services
             return new StartupInfo
             {
                 ProjectDir = projectDir, XbeOutput = xbe, ConfigName = configName, IsXbox = isXbox,
-                Project = proj, SolutionConfig = solutionConfig,
+                IsLaunchable = facts.IsLaunchable, Project = proj, SolutionConfig = solutionConfig,
             };
         }
 
@@ -352,6 +369,7 @@ namespace RxdkVs.Package.Services
         {
             public bool IsXbox;
             public bool IsDxt;
+            public string ConfigurationType; // $(ConfigurationType): Application / StaticLibrary / DebuggerExtension / ...
             public string ProjectDir;
             public string TargetName;      // $(TargetName)
             public string TargetPath;      // absolute $(OutDir)$(TargetName)$(TargetExt) (.xbe/.dxt/.lib)
@@ -359,6 +377,15 @@ namespace RxdkVs.Package.Services
             public string RemotePath;      // $(RxdkRemotePath) (may be empty -> CLI convention)
             public bool? ForceCopy;        // $(RxdkForceCopy)
             public string DeployPaths;     // $(RxdkDeployPaths), ';'-separated (may be empty)
+
+            /// <summary>
+            /// True for the project kinds that produce something to put on the console: an Application
+            /// (.xbe, deploy + F5-attach) or a DebuggerExtension (.dxt, copied to E:\dxt + warm reboot).
+            /// A StaticLibrary/DynamicLibrary is still an RXDK Xbox project (Keyword=RXDK) but only builds
+            /// a .lib, so it cannot be deployed or debugged as a title.
+            /// </summary>
+            public bool IsLaunchable =>
+                string.Equals(ConfigurationType, "Application", StringComparison.OrdinalIgnoreCase) || IsDxt;
         }
 
         // The VCConfiguration (dynamic) for a project's config, e.g. "Debug|Xbox".
@@ -408,7 +435,8 @@ namespace RxdkVs.Package.Services
             var isXbox = string.Equals(Eval("$(Keyword)"), "RXDK", OIC)
                 || string.Equals(Eval("$(ApplicationType)"), "RXDK", OIC)
                 || string.Equals(Eval("$(RxdkXbox)"), "true", OIC);
-            var isDxt = string.Equals(Eval("$(ConfigurationType)"), "DebuggerExtension", OIC);
+            var configType = Eval("$(ConfigurationType)") ?? "";
+            var isDxt = string.Equals(configType, "DebuggerExtension", OIC);
 
             var outDir = Eval("$(OutDir)") ?? string.Empty;
             var targetName = Eval("$(TargetName)");
@@ -426,6 +454,7 @@ namespace RxdkVs.Package.Services
             {
                 IsXbox = isXbox,
                 IsDxt = isDxt,
+                ConfigurationType = configType,
                 ProjectDir = projectDir,
                 TargetName = targetName,
                 TargetPath = targetPath,

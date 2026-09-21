@@ -73,7 +73,6 @@ namespace RxdkVs.Package.ToolWindow
         private void OnLaunchNeighborhoodApp(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdLaunchXbNeighborhood);
         private void OnOpenXboxNeighborhood(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdOpenXboxNeighborhood);
         private void OnInstallXboxNeighborhood(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdInstallXboxNeighborhood);
-        private void OnCycleGlobals(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdCycleGlobalsScope);
         // Project
         private void OnImportProject(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdImportProject);
         private void OnImportVsCodeProject(object sender, RoutedEventArgs e) => Exec(CommandIds.CmdImportVsCodeProject);

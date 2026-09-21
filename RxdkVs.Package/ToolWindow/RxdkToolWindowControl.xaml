@@ -119,7 +119,6 @@
             <Button Style="{StaticResource Act}" Content="Xbox Neighborhood (App)"        Click="OnLaunchNeighborhoodApp" />
             <Button Style="{StaticResource Act}" Content="Xbox Neighborhood (Explorer)"   Click="OnOpenXboxNeighborhood" />
             <Button Style="{StaticResource Act}" Content="Install Xbox Neighborhood"       Click="OnInstallXboxNeighborhood" />
-            <Button Style="{StaticResource Act}" Content="Cycle Globals Visibility (Title / +Constants / All)" Click="OnCycleGlobals" />
 
             <!-- Project -->
             <TextBlock Text="PROJECT" Style="{StaticResource Section}" />

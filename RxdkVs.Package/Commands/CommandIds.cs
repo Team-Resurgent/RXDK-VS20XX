@@ -37,7 +37,6 @@ namespace RxdkVs.Package.Commands
         public const int CmdLaunchXbwatson = 0x0113;     // rxdk.launchXbwatson
         public const int CmdLaunchXbNeighborhood = 0x0114; // rxdk.launchXbNeighborhood
         public const int CmdOpenXboxNeighborhood = 0x0115; // rxdk.openXboxNeighborhood
-        public const int CmdCycleGlobalsScope = 0x0116;  // rxdk.cycleGlobalsScope
         public const int CmdSetBuildType = 0x0117;       // rxdk.setBuildType
         public const int CmdOpenSettings = 0x0118;       // rxdk.openSettings
         public const int CmdDeployProject = 0x0119;      // rxdk.deployProject (project context menu)

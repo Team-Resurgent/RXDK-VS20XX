@@ -117,7 +117,6 @@
       <IDSymbol name="CmdLaunchXbwatson" value="0x0113" />
       <IDSymbol name="CmdLaunchXbNeighborhood" value="0x0114" />
       <IDSymbol name="CmdOpenXboxNeighborhood" value="0x0115" />
-      <IDSymbol name="CmdCycleGlobalsScope" value="0x0116" />
       <IDSymbol name="CmdSetBuildType" value="0x0117" />
       <IDSymbol name="CmdOpenSettings" value="0x0118" />
       <IDSymbol name="CmdDeployProject" value="0x0119" />

@@ -52,8 +52,8 @@ LICENSE.txt
 Every `contributes.commands` entry from RXDK-VSCode `package.json` has a corresponding button in
 `RxdkPackage.vsct` / `Commands/CommandIds.cs` (Build, Deploy, Run, Debug, Warm Reboot, Remove DXT,
 Set Xbox IP, New Project, New Prebuilt XBE, Complete Setup, Open SDK/Tools/Docs folders, SDK/Extension
-docs, Fetch Latest SDK, Install .NET 8, Launch xbWatson/xbNeighborhood, Open Xbox Neighborhood, Cycle
-Globals Visibility, Set Build Type, Settings). The `taskDefinitions` (`type:"rxdk"`) and `debuggers`
+docs, Fetch Latest SDK, Install .NET 8, Launch xbWatson/xbNeighborhood, Open Xbox Neighborhood,
+Set Build Type, Settings). The `taskDefinitions` (`type:"rxdk"`) and `debuggers`
 (`type:"xbox"`) contributions map to the generated `tasks.vs.json` / `launch.vs.json`.
 
 ## Building & testing
@@ -95,13 +95,10 @@ $env:RXDK_TOOLS_DIR = "D:\Git\RXDK-VS20XX\Rxdk.Cli\bin\Debug\net8.0"   # holds R
 4. **New Project / New Prebuilt XBE wizards** (Phase 3): `NewProjectAsync` currently opens the tool
    window and points the user at manual `rxdk.project.json` creation. Add an `IVsTemplateWizard`
    flow over the `templates/` set that also calls `ProjectConfigGenerator.Generate`.
-5. **Options page** (Phase 3): persist `rxdk.defaultConsole`, build type (`--optimize`), and
-   `rxdk.debugger.globalsScope` in a `DialogPage`. `SetBuildTypeAsync` / `OpenSettingsAsync` are
-   placeholders.
-6. **Cycle Globals Visibility** (`CycleGlobalsScopeAsync`): send a custom `rxdk/cycleGlobalsScope`
-   DAP request through the Debug Adapter Host during a live session (Phase 2).
-7. **Remove DXT**: add a dedicated `remove-dxt` verb to `Rxdk.Cli` and call it (currently reboots).
-8. **Command icons**: `Resources\RxdkCommands.png` is a placeholder colored-square strip — replace
+5. **Options page** (Phase 3): persist `rxdk.defaultConsole` and build type (`--optimize`) in a
+   `DialogPage`. `SetBuildTypeAsync` / `OpenSettingsAsync` are placeholders.
+6. **Remove DXT**: add a dedicated `remove-dxt` verb to `Rxdk.Cli` and call it (currently reboots).
+7. **Command icons**: `Resources\RxdkCommands.png` is a placeholder colored-square strip — replace
    with real 16×16 icons (or switch the `.vsct` to `KnownMonikers`).
 9. **ProjectConfigGenerator manifest parsing**: it parses `rxdk.project.json` with
    `System.Text.Json` directly (the net8 `Rxdk.Engine.Model` type can't be referenced from a

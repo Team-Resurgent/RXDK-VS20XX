@@ -105,7 +105,6 @@ namespace RxdkVs.Package.Commands
             Add(CommandIds.CmdLaunchXbNeighborhood, () => LaunchHostToolAsync("xbNeighborhood"));
             Add(CommandIds.CmdOpenXboxNeighborhood, OpenXboxNeighborhoodAsync);
             Add(CommandIds.CmdInstallXboxNeighborhood, InstallXboxNeighborhoodAsync);
-            Add(CommandIds.CmdCycleGlobalsScope, CycleGlobalsScopeAsync);
             Add(CommandIds.CmdSetBuildType, SetBuildTypeAsync);
             Add(CommandIds.CmdSetupPrerequisites, SetupPrerequisitesAsync);
             Add(CommandIds.CmdOpenSettings, OpenSettingsAsync);
@@ -1283,14 +1282,6 @@ namespace RxdkVs.Package.Commands
             await ShowInfoAsync("Build flavor follows the active solution configuration (Debug / Release) — " +
                 "pick it from the toolbar configuration selector. Per-project, set it via the project's " +
                 "Xbox Build property page (Build Flavor).");
-        }
-
-        private async Task CycleGlobalsScopeAsync()
-        {
-            // Live debug command; forwarded to Rxdk.Dap via a custom DAP request during a session.
-            // TODO: send a custom 'rxdk/cycleGlobalsScope' request through the Debug Adapter Host
-            // (parity with RXDK-VSCode rxdk.cycleGlobalsScope). No-op when no session is active.
-            await ShowInfoAsync("Cycle Globals Visibility applies during an active debug session (Phase 2).");
         }
 
         private async Task OpenSettingsAsync()

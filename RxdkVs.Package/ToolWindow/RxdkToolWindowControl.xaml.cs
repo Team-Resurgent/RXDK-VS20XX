@@ -136,6 +136,7 @@ namespace RxdkVs.Package.ToolWindow
         {
             ("SDK", "install-sdk"),
             ("Docs", "install-docs"),
+            ("LLVM", "install-llvm"),
             ("Tools", "install-tools"),
             ("Samples", "install-samples"),
         };
@@ -148,6 +149,9 @@ namespace RxdkVs.Package.ToolWindow
             // The live version is newer than this extension can use: its update is withheld until the
             // extension itself is updated (the CLI reports this as a 4th "blocked" column).
             public bool Blocked;
+            // The LLVM toolchain: rolling "latest", so it has no version to compare. It shows
+            // installed / not-installed and always offers install-or-reinstall (re-pull latest).
+            public bool IsToolchain;
             public bool Installed => !string.IsNullOrEmpty(Current) && Current != "-";
             public bool AvailableKnown => !string.IsNullOrEmpty(Available) && Available != "-";
             public bool UpdateAvailable =>
@@ -182,6 +186,26 @@ namespace RxdkVs.Package.ToolWindow
                 }
             }
 
+            // The LLVM toolchain is the rolling "latest" release with no VERSION, so it isn't in
+            // `versions`. Probe it separately (llvm-status prints a "clang:" line only when present)
+            // and slot it in after Docs to match the VS Code prerequisite order (SDK, Docs, LLVM, …).
+            if (rows.Count > 0)
+            {
+                string llvmOut = null;
+                try { llvmOut = await RunCliCaptureAsync("llvm-status", timeoutMs: 15000); } catch { /* treated as not installed */ }
+                var llvmInstalled = !string.IsNullOrEmpty(llvmOut) &&
+                    llvmOut.IndexOf("clang:", StringComparison.OrdinalIgnoreCase) >= 0;
+                var llvmRow = new ComponentRow
+                {
+                    Name = "LLVM",
+                    IsToolchain = true,
+                    Current = llvmInstalled ? "installed" : "-",
+                    Available = "-",
+                };
+                var docsIdx = rows.FindIndex(r => r.Name == "Docs");
+                if (docsIdx >= 0) rows.Insert(docsIdx + 1, llvmRow); else rows.Add(llvmRow);
+            }
+
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             RenderComponentRows(rows);
         }
@@ -212,7 +236,9 @@ namespace RxdkVs.Package.ToolWindow
             {
                 var sdk = rows.FirstOrDefault(r => r.Name == "SDK");
                 var tools = rows.FirstOrDefault(r => r.Name == "Tools");
-                var coreComponents = sdk != null && sdk.Installed && tools != null && tools.Installed;
+                var llvm = rows.FirstOrDefault(r => r.Name == "LLVM");
+                var coreComponents = sdk != null && sdk.Installed && tools != null && tools.Installed
+                    && (llvm == null || llvm.Installed);
                 var allReady = coreComponents && RxdkCommands.VsSidePrerequisitesInstalled();
                 InstallPrereqsButton.Content = allReady ? "Reinstall Build Tools" : "Install Prerequisites";
                 InstallPrereqsButton.Visibility = Visibility.Visible;
@@ -238,7 +264,9 @@ namespace RxdkVs.Package.ToolWindow
 
                 // Blocked = the live version is newer than this extension can use, so no install/update
                 // button is offered (the ceiling is the extension version).
-                var actionable = !r.Blocked && (!r.Installed || r.UpdateAvailable);
+                // The toolchain is always actionable (install when missing, reinstall to re-pull the
+                // rolling latest when present); versioned components act only on a real update.
+                var actionable = !r.Blocked && (!r.Installed || r.UpdateAvailable || r.IsToolchain);
                 anyActionable |= actionable;
                 if (actionable)
                 {
@@ -246,7 +274,7 @@ namespace RxdkVs.Package.ToolWindow
                     var btn = new Button
                     {
                         Style = (Style)FindResource("Act"),
-                        Content = r.Installed ? "Update" : "Get",
+                        Content = r.IsToolchain ? (r.Installed ? "Reinstall" : "Get") : (r.Installed ? "Update" : "Get"),
                         Width = 72,
                         HorizontalContentAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(8, 0, 0, 0),
@@ -258,7 +286,9 @@ namespace RxdkVs.Package.ToolWindow
                 }
 
                 string status;
-                if (r.Blocked)
+                if (r.IsToolchain)
+                    status = r.Installed ? "installed" : "not installed";
+                else if (r.Blocked)
                     status = $"{r.Available} available · update the RXDK extension first";
                 else if (!r.Installed)
                     status = r.AvailableKnown ? $"not installed · latest {r.Available}" : "not installed";
@@ -290,6 +320,10 @@ namespace RxdkVs.Package.ToolWindow
             // Only act on components that are not up to date (missing or with a newer version).
             var verbs = ComponentsPanel.Children.OfType<DockPanel>()
                 .SelectMany(d => d.Children.OfType<Button>())
+                // "Reinstall" (the installed LLVM toolchain) is a manual refresh, not a pending
+                // update -- Update All shouldn't re-pull the ~400MB toolchain. Missing LLVM shows
+                // "Get" and is still included so Update All installs it.
+                .Where(b => (b.Content as string) != "Reinstall")
                 .Select(b => b.Tag as string)
                 .Where(v => !string.IsNullOrEmpty(v))
                 .Distinct()

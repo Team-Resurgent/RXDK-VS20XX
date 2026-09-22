@@ -149,9 +149,6 @@ namespace RxdkVs.Package.ToolWindow
             // The live version is newer than this extension can use: its update is withheld until the
             // extension itself is updated (the CLI reports this as a 4th "blocked" column).
             public bool Blocked;
-            // The LLVM toolchain: rolling "latest", so it has no version to compare. It shows
-            // installed / not-installed and always offers install-or-reinstall (re-pull latest).
-            public bool IsToolchain;
             public bool Installed => !string.IsNullOrEmpty(Current) && Current != "-";
             public bool AvailableKnown => !string.IsNullOrEmpty(Available) && Available != "-";
             public bool UpdateAvailable =>
@@ -184,26 +181,6 @@ namespace RxdkVs.Package.ToolWindow
                             Blocked = parts.Length >= 4 && parts[3].Trim() == "1",
                         });
                 }
-            }
-
-            // The LLVM toolchain is the rolling "latest" release with no VERSION, so it isn't in
-            // `versions`. Probe it separately (llvm-status prints a "clang:" line only when present)
-            // and slot it in after Docs to match the VS Code prerequisite order (SDK, Docs, LLVM, …).
-            if (rows.Count > 0)
-            {
-                string llvmOut = null;
-                try { llvmOut = await RunCliCaptureAsync("llvm-status", timeoutMs: 15000); } catch { /* treated as not installed */ }
-                var llvmInstalled = !string.IsNullOrEmpty(llvmOut) &&
-                    llvmOut.IndexOf("clang:", StringComparison.OrdinalIgnoreCase) >= 0;
-                var llvmRow = new ComponentRow
-                {
-                    Name = "LLVM",
-                    IsToolchain = true,
-                    Current = llvmInstalled ? "installed" : "-",
-                    Available = "-",
-                };
-                var docsIdx = rows.FindIndex(r => r.Name == "Docs");
-                if (docsIdx >= 0) rows.Insert(docsIdx + 1, llvmRow); else rows.Add(llvmRow);
             }
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -288,9 +265,7 @@ namespace RxdkVs.Package.ToolWindow
                 }
 
                 string status;
-                if (r.IsToolchain)
-                    status = r.Installed ? "installed" : "not installed";
-                else if (r.Blocked)
+                if (r.Blocked)
                     status = $"{r.Available} available · update the RXDK extension first";
                 else if (!r.Installed)
                     status = r.AvailableKnown ? $"not installed · latest {r.Available}" : "not installed";

@@ -250,6 +250,11 @@ namespace RxdkVs.Package.ToolWindow
                 if (actionable)
                 {
                     var verb = ComponentVerbs.FirstOrDefault(c => c.Name == r.Name).Verb;
+                    var reinstall = r.Installed && !r.UpdateAvailable;
+                    // Reinstalling the LLVM toolchain must force a re-download (install-llvm skips when
+                    // the build stamp already matches); update-llvm is the force path. Other components'
+                    // install verb re-fetches unconditionally, so they need no special case.
+                    if (reinstall && r.Name == "LLVM") verb = "update-llvm";
                     var btn = new Button
                     {
                         Style = (Style)FindResource("Act"),

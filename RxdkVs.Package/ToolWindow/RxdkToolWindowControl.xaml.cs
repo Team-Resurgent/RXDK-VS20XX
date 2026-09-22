@@ -264,17 +264,19 @@ namespace RxdkVs.Package.ToolWindow
 
                 // Blocked = the live version is newer than this extension can use, so no install/update
                 // button is offered (the ceiling is the extension version).
-                // The toolchain is always actionable (install when missing, reinstall to re-pull the
-                // rolling latest when present); versioned components act only on a real update.
-                var actionable = !r.Blocked && (!r.Installed || r.UpdateAvailable || r.IsToolchain);
-                anyActionable |= actionable;
+                // Every non-blocked component gets an action: Get (missing), Update (outdated) or
+                // Reinstall (installed + current, and the versionless toolchain) to re-pull it.
+                var actionable = !r.Blocked;
+                // Only a genuine update (missing/outdated) enables "Update All"; a Reinstall is a
+                // manual per-row refresh and is excluded from Update All (see OnUpdateAll).
+                anyActionable |= !r.Blocked && (!r.Installed || r.UpdateAvailable);
                 if (actionable)
                 {
                     var verb = ComponentVerbs.FirstOrDefault(c => c.Name == r.Name).Verb;
                     var btn = new Button
                     {
                         Style = (Style)FindResource("Act"),
-                        Content = r.IsToolchain ? (r.Installed ? "Reinstall" : "Get") : (r.Installed ? "Update" : "Get"),
+                        Content = r.Installed ? (r.UpdateAvailable ? "Update" : "Reinstall") : "Get",
                         Width = 72,
                         HorizontalContentAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(8, 0, 0, 0),

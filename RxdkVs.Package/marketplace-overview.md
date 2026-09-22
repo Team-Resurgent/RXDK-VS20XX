@@ -16,7 +16,7 @@ MSVC-free Xbox SDK. The Visual Studio counterpart to the
 - **RXDK tool window** — set the devkit IP, warm-reboot, open the SDK / tools / docs
   folders, launch xbWatson and Xbox Neighborhood, browse docs, and manage installed
   components (installed-vs-available versions with per-component and *Update All* buttons).
-- **One-click setup** — installs the host tools, SDK, docs, and Zig toolchain into
+- **One-click setup** — installs the host tools, SDK, docs, and LLVM toolchain into
   `%ProgramData%\RXDK`.
 - **VS2003 project import** — bring a classic XDK `.vcproj` / `.sln` forward to RXDK.
 
@@ -24,7 +24,7 @@ MSVC-free Xbox SDK. The Visual Studio counterpart to the
 
 1. Install the extension and restart Visual Studio.
 2. Open the **RXDK** tool window (View ▸ Other Windows ▸ RXDK) and click
-   **Install Prerequisites** to download the SDK, host tools, docs, and Zig.
+   **Install Prerequisites** to download the SDK, host tools, docs, and the LLVM toolchain.
 3. **File ▸ New ▸ Project**, filter by the **Xbox** tag, and pick a template.
 4. Set your devkit IP in the tool window, then press **F5** to build, deploy, and debug.
 

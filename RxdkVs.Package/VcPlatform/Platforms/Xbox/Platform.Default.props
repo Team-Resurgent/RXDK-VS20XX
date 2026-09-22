@@ -3,7 +3,7 @@
   RXDK "Xbox" MSBuild platform — a thin alias to the installed x64 platform.
 
   RXDK titles are ConfigurationType=Makefile projects whose real build is delegated to
-  Rxdk.Cli (Zig/clang); the x64 MSVC toolset is imported only so Visual Studio can drive
+  Rxdk.Cli (clang/LLVM); the x64 MSVC toolset is imported only so Visual Studio can drive
   IntelliSense. Aliasing x64 (rather than hand-authoring platform content) keeps this
   correct across VS versions and toolsets. Installed into <VCTargetsPath>\Platforms\Xbox.
 -->

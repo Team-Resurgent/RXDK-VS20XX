@@ -9,7 +9,7 @@
   so projects no longer carry per-project props/targets/rule files.
 
   Visual Studio owns the project system (Solution Explorer, IntelliSense, Build menu, Error List,
-  F5), but the compile is delegated to Rxdk.Cli.exe, which runs the clean-room Zig pipeline against
+  F5), but the compile is delegated to Rxdk.Cli.exe, which runs the clean-room clang (LLVM) pipeline against
   our own headers/libs. cl.exe does NOT compile the title (our libs are GNU-ABI and can't be linked
   by MSVC); it only powers the IDE.
 -->
@@ -26,7 +26,7 @@
     <RxdkCli Condition="'$(RXDK_TOOLS_DIR)' != ''">$(RXDK_TOOLS_DIR)\Rxdk.Cli.exe</RxdkCli>
     <RxdkCli Condition="'$(RxdkCli)' == ''">$(ProgramData)\RXDK\engine\Rxdk.Cli.exe</RxdkCli>
 
-    <!-- Clean-room Zig SDK headers, for IntelliSense (the same dir the build compiles against). -->
+    <!-- Clean-room RXDK SDK headers, for IntelliSense (the same dir the build compiles against). -->
     <RxdkSdkInclude>$(ProgramData)\RXDK\sdk\include</RxdkSdkInclude>
 
     <!-- IntelliSense-only shim headers (freestanding stddef/stdarg/float, pshpack, and the

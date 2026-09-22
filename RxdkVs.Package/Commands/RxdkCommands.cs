@@ -783,7 +783,7 @@ namespace RxdkVs.Package.Commands
 
         // MSVC v143 C++ build tools component (VS 2022/2026). The RXDK native .vcxproj project
         // system needs a C++ toolset installed to load projects and drive IntelliSense, even
-        // though the actual compile is delegated to Zig/clang.
+        // though the actual compile is delegated to clang (LLVM).
         private const string Vc143Component = "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
 
         // Install the custom 'Xbox' MSBuild platform and the RXDK MSBuild Application Type into every
@@ -1110,7 +1110,7 @@ namespace RxdkVs.Package.Commands
 
         // One-click setup: installs everything RXDK needs, skipping whatever is already present, so
         // it's cheap to re-run. Covers the VS-side prerequisites (C++ build tools + the Xbox
-        // platform) and the CLI-managed components (Zig, host tools, SDK, docs) in one action.
+        // platform) and the CLI-managed components (LLVM, host tools, SDK, docs) in one action.
         private async Task SetupPrerequisitesAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -1131,7 +1131,7 @@ namespace RxdkVs.Package.Commands
             }
 
             // 1) MSVC v143 C++ build tools — the VC project system needs them to load/build .vcxproj
-            //    and to host IntelliSense (the compile itself is Zig/clang). Opens the VS Installer
+            //    and to host IntelliSense (the compile itself is clang/LLVM). Opens the VS Installer
             //    when missing; that's an external, interactive step, so if we kick it off the Xbox
             //    platform install below is skipped this run (re-run setup after VS restarts).
             var buildToolsPending = false;
@@ -1159,7 +1159,7 @@ namespace RxdkVs.Package.Commands
                 platformInstalled = IsXboxPlatformCurrent();
             }
 
-            // 3) CLI-managed components: install only what's missing (won't re-fetch Zig etc.).
+            // 3) CLI-managed components: install only what's missing (won't re-fetch LLVM etc.).
             //    Pass the extension version so a component whose live version is newer than this
             //    extension can use is withheld (CLI exit code 3) rather than pulled ahead.
             var installed = 0;
@@ -1174,7 +1174,7 @@ namespace RxdkVs.Package.Commands
                     else if (rc == 0) installed++;
                 }
             }
-            await EnsureAsync("zig-status", "install-zig");
+            await EnsureAsync("llvm-status", "install-llvm");
             await EnsureAsync("tools-status", "install-tools");
             await EnsureAsync("sdk-status", "install-sdk");
             await EnsureAsync("docs-status", "install-docs");
@@ -1195,7 +1195,7 @@ namespace RxdkVs.Package.Commands
             }
             else if (installed == 0 && !platformInstalled)
             {
-                await ShowInfoAsync("RXDK is fully set up — C++ tools, Xbox platform, SDK, host tools, Zig and docs are all present.");
+                await ShowInfoAsync("RXDK is fully set up — C++ tools, Xbox platform, SDK, host tools, LLVM and docs are all present.");
             }
             else
             {

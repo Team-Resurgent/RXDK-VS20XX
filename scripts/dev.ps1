@@ -161,6 +161,7 @@ function Invoke-Templates {
         Game            = 'Original Xbox Game'
         Empty           = 'Original Xbox Empty'
         Lib             = 'Original Xbox Lib'
+        Plugin          = 'Original Xbox Plugin'
         Dxt             = 'Original Xbox DXT'
         ControllerInput = 'Original Xbox Controller Input'
         FontScroller    = 'Original Xbox Font Scroller'

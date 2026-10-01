@@ -1,0 +1,8 @@
+;
+; Export list for this plugin (.xbs). Each name here becomes an exported symbol the
+; host resolves by name. Using a .def gives you exact control of the export table
+; (and avoids relying on __declspec(dllexport), which is a no-op for PE exports on
+; this toolchain). Add one line per exported entry point.
+;
+EXPORTS
+    PluginEntry
